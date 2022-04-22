@@ -24,12 +24,12 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-//init database, (also drop everything idgaf)
+//init database
 using (var scope = app.Services.CreateScope())
 using (var context = scope.ServiceProvider.GetRequiredService<GariunaiDbContext>())
 {
-    context.Database.EnsureDeleted();
-    context.Database.EnsureCreated();
+    context.Database.SetCommandTimeout(TimeSpan.FromMinutes(3));
+    context.Database.Migrate();
 }
        
 
