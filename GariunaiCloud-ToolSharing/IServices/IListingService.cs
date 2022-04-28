@@ -1,6 +1,6 @@
 ﻿using GariunaiCloud_ToolSharing.Models;
 
-namespace GariunaiCloud_ToolSharing.Services;
+namespace GariunaiCloud_ToolSharing.IServices;
 
 public interface IListingService
 {

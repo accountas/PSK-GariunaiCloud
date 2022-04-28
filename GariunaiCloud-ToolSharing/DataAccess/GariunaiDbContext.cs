@@ -33,26 +33,41 @@ public class GariunaiDbContext : DbContext
             new
             {
                 ListingId = 1L,
-                DaysPrice = 123m, Deposit = 100m, Title = "Golden Shovel",
-                Description = "alskdjalkdjalskdjalksjdalskdjalksjdwiad", OwnerUserId = 1L
+                DaysPrice = 123m,
+                Deposit = 100m, 
+                Title = "Golden Shovel",
+                Description = "alskdjalkdjalskdjalksjdalskdjalksjdwiad", 
+                OwnerUserId = 1L,
+                City = "Klaipėda"
             },
             new
             {
                 ListingId = 2L,
-                DaysPrice = 12m, Deposit = 10m, Title = "Irankis", Description = "AAAAAAAAAAAAAAAAAAAAAAAA",
-                OwnerUserId = 2L
+                DaysPrice = 12m, 
+                Deposit = 10m, 
+                Title = "Irankis", 
+                Description = "AAAAAAAAAAAAAAAAAAAAAAAA",
+                OwnerUserId = 2L,
+                City = "Vilnius"
             },
             new
             {
                 ListingId = 3L,
-                DaysPrice = 1m, Deposit = 100m, Title = "Pjuklas",
-                Description = "DAAAAAAAAAAAAAAAAAAAUG TEEEEEEEEEEEEEEEEEEKSTO", OwnerUserId = 1L
+                DaysPrice = 1m, Deposit = 100m,
+                Title = "Pjuklas",
+                Description = "DAAAAAAAAAAAAAAAAAAAUG TEEEEEEEEEEEEEEEEEEKSTO",
+                OwnerUserId = 1L,
+                City = "Kaunas"
             },
             new
             {
                 ListingId = 4L,
-                DaysPrice = 0m, Deposit = 1m, Title = "Dantu krapstukas", Description = "Labai pigu!!!!!!!!!!!!",
-                OwnerUserId = 2L
+                DaysPrice = 0m, 
+                Deposit = 1m,
+                Title = "Dantu krapstukas",
+                Description = "Labai pigu!!!!!!!!!!!!",
+                OwnerUserId = 2L,
+                City = "Balbieriškis"
             }
         );
     }

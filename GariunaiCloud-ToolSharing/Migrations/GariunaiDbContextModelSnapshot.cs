@@ -30,6 +30,9 @@ namespace GariunaiCloud_ToolSharing.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ListingId"), 1L, 1);
 
+                    b.Property<string>("City")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<decimal>("DaysPrice")
                         .HasColumnType("decimal(18,2)");
 
@@ -55,6 +58,7 @@ namespace GariunaiCloud_ToolSharing.Migrations
                         new
                         {
                             ListingId = 1L,
+                            City = "Klaipėda",
                             DaysPrice = 123m,
                             Deposit = 100m,
                             Description = "alskdjalkdjalskdjalksjdalskdjalksjdwiad",
@@ -64,6 +68,7 @@ namespace GariunaiCloud_ToolSharing.Migrations
                         new
                         {
                             ListingId = 2L,
+                            City = "Vilnius",
                             DaysPrice = 12m,
                             Deposit = 10m,
                             Description = "AAAAAAAAAAAAAAAAAAAAAAAA",
@@ -73,6 +78,7 @@ namespace GariunaiCloud_ToolSharing.Migrations
                         new
                         {
                             ListingId = 3L,
+                            City = "Kaunas",
                             DaysPrice = 1m,
                             Deposit = 100m,
                             Description = "DAAAAAAAAAAAAAAAAAAAUG TEEEEEEEEEEEEEEEEEEKSTO",
@@ -82,6 +88,7 @@ namespace GariunaiCloud_ToolSharing.Migrations
                         new
                         {
                             ListingId = 4L,
+                            City = "Balbieriškis",
                             DaysPrice = 0m,
                             Deposit = 1m,
                             Description = "Labai pigu!!!!!!!!!!!!",
@@ -101,8 +108,17 @@ namespace GariunaiCloud_ToolSharing.Migrations
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<byte[]>("PasswordHash")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<byte[]>("PasswordSalt")
+                        .HasColumnType("varbinary(max)");
+
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
 
                     b.Property<string>("UserName")
                         .HasColumnType("nvarchar(450)");
@@ -121,6 +137,7 @@ namespace GariunaiCloud_ToolSharing.Migrations
                             UserId = 1L,
                             Email = "mail1.com",
                             PhoneNumber = "+1233567812",
+                            Role = 0,
                             UserName = "Useris1"
                         },
                         new
@@ -128,6 +145,7 @@ namespace GariunaiCloud_ToolSharing.Migrations
                             UserId = 2L,
                             Email = "mail2.com",
                             PhoneNumber = "+1233567812",
+                            Role = 0,
                             UserName = "Useris2"
                         });
                 });

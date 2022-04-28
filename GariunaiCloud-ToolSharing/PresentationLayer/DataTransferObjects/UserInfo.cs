@@ -1,7 +1,7 @@
-﻿namespace GariunaiCloud_ToolSharing.Controllers.DataTransferObjects;
+﻿namespace GariunaiCloud_ToolSharing.PresentationLayer.DataTransferObjects;
 
 #nullable disable
-public class UserPayload
+public class UserInfo
 {
     public string UserName { get; set; }
     public string Email { get; set; }
