@@ -110,11 +110,19 @@ namespace GariunaiCloud_ToolSharing.PresentationLayer
         /// <summary>
         /// Login, returns JWT token
         /// </summary>
-        /// <param name="credentials">Username ans password</param>
+        /// <param name="credentials">Either username or email and passoword</param>
         [HttpPost("login")]
         public async Task<IActionResult> Login(UserCredentials credentials)
         {
-            var user = await _userService.GetByCredentials(credentials.Username, credentials.Password);
+            if (!(credentials.Email == null ^ credentials.Username == null))
+            {
+                return BadRequest("Username OR Email should not be empty");
+            }
+
+            var user = credentials.Username != null
+                ? await _userService.AuthenticateByUsername(credentials.Username, credentials.Password)
+                : await _userService.AuthenticateByEmail(credentials.Email, credentials.Password);
+            
             if (user == null)
             {
                 return Unauthorized();

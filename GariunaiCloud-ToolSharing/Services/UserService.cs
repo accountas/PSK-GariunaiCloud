@@ -59,11 +59,25 @@ public class UserService : IUserService
         return user;
     }
 
-    public async Task<User?> GetByCredentials(string username, string password)
+    public async Task<User?> AuthenticateByUsername(string username, string password)
     {
         var user = await _context
             .Users
             .FirstOrDefaultAsync(u => u.UserName == username);
+        
+        if(user == null)
+        {
+            return null;
+        }
+        
+        return !_passwordHashingStrategy.VerifyPassword(password, user.PasswordHash, user.PasswordSalt) ? null : user;
+    }
+
+    public async Task<User?> AuthenticateByEmail(string email, string password)
+    {
+        var user = await _context
+            .Users
+            .FirstOrDefaultAsync(u => u.Email == email);
         
         if(user == null)
         {

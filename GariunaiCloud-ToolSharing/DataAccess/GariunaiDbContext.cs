@@ -19,6 +19,10 @@ public class GariunaiDbContext : DbContext
             .HasIndex(u => u.UserName)
             .IsUnique();
         
+        modelBuilder.Entity<User>()
+            .HasIndex(u => u.Email)
+            .IsUnique();
+        
         _seedData(modelBuilder);
         base.OnModelCreating(modelBuilder);
     }
