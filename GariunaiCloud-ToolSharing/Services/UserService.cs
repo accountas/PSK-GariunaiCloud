@@ -1,4 +1,5 @@
-﻿using GariunaiCloud_ToolSharing.DataAccess;
+﻿using System.Text.RegularExpressions;
+using GariunaiCloud_ToolSharing.DataAccess;
 using GariunaiCloud_ToolSharing.IServices;
 using GariunaiCloud_ToolSharing.Models;
 using Microsoft.EntityFrameworkCore;
@@ -25,7 +26,18 @@ public class UserService : IUserService
         return user;
     }
 
-    public async Task<User?> RegisterUserAsync(string username, string password)
+    public async Task<bool> VerifyNewEmailAsync(string email)
+    {
+        var emailExists = await _context
+            .Users
+            .AnyAsync(u => u.Email == email);
+
+        return !emailExists;
+    }
+    
+    
+
+    public async Task<User?> RegisterUserAsync(string username, string email, string password)
     {
         if(GetUserByUsernameAsync((username)).Result != null)
         {
@@ -37,6 +49,7 @@ public class UserService : IUserService
         var user = new User
         {
             UserName = username,
+            Email = email,
             PasswordHash = hashedPassword,
             PasswordSalt = salt
         };

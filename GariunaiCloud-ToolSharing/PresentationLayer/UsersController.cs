@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Text.RegularExpressions;
 using AutoMapper;
 using GariunaiCloud_ToolSharing.IServices;
 using GariunaiCloud_ToolSharing.Models;
@@ -23,7 +24,7 @@ namespace GariunaiCloud_ToolSharing.PresentationLayer
             _userService = userService;
             _jwtTokenService = jwtTokenService;
         }
-        
+
         /// <summary>
         /// Get all users
         /// </summary>
@@ -34,7 +35,7 @@ namespace GariunaiCloud_ToolSharing.PresentationLayer
             var dto = _mapper.Map<IList<UserInfo>>(listings);
             return Ok(dto);
         }
-        
+
         /// <summary>
         /// Get user by username
         /// </summary>
@@ -52,7 +53,7 @@ namespace GariunaiCloud_ToolSharing.PresentationLayer
             var dto = _mapper.Map<UserInfo>(user);
             return Ok(dto);
         }
-        
+
         /// <summary>
         /// Update your account information
         /// </summary>
@@ -65,34 +66,47 @@ namespace GariunaiCloud_ToolSharing.PresentationLayer
         public async Task<IActionResult> UpdateInfo(UserInfo userInfo)
         {
             var userName = User.Claims.First(c => c.Type == ClaimTypes.Name).Value;
-            if(userInfo.UserName != null)
+            if (userInfo.UserName != null)
             {
                 return BadRequest("Username change is not supported");
             }
-            
+
             var user = _mapper.Map<User>(userInfo);
             var result = await _userService.UpdateUserInfoAsync(userName, user);
             var dto = _mapper.Map<UserInfo>(result);
-            
+
             return Ok(dto);
         }
-        
+
         /// <summary>
         ///  Register a new user
         /// </summary>
-        /// <param name="credentials">Username and password</param>
+        /// <param name="credentials">Username, emil and password</param>
         [HttpPost("register")]
         public async Task<IActionResult> CreateUser(UserCredentials credentials)
         {
-            var user = await _userService.RegisterUserAsync(credentials.Username, credentials.Password);
+            if (!Regex.IsMatch(credentials.Email, @"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$"))
+            {
+                return BadRequest("Invalid email");
+            }
+
+            if (!_userService.VerifyNewEmailAsync(credentials.Email).Result)
+            {
+                return BadRequest("Error email already exists");
+            }
+
+            var user = await _userService.RegisterUserAsync(credentials.Username, credentials.Email,
+                credentials.Password);
+
             if (user == null)
             {
-                return BadRequest();
+                return BadRequest("User already exists");
             }
+
             var dto = _mapper.Map<UserInfo>(user);
             return Ok(dto);
         }
-        
+
         /// <summary>
         /// Login, returns JWT token
         /// </summary>
