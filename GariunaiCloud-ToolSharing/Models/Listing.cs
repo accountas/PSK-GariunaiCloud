@@ -9,5 +9,6 @@ public class Listing
     public string Title { get; set; }
     public string Description { get; set; }
     public decimal Deposit { get; set; }
+    public bool Hidden { get; set; }
     public User Owner { get; set; }
 }

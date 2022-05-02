@@ -42,6 +42,9 @@ namespace GariunaiCloud_ToolSharing.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("Hidden")
+                        .HasColumnType("bit");
+
                     b.Property<long?>("OwnerUserId")
                         .HasColumnType("bigint");
 
@@ -62,6 +65,7 @@ namespace GariunaiCloud_ToolSharing.Migrations
                             DaysPrice = 123m,
                             Deposit = 100m,
                             Description = "alskdjalkdjalskdjalksjdalskdjalksjdwiad",
+                            Hidden = false,
                             OwnerUserId = 1L,
                             Title = "Golden Shovel"
                         },
@@ -72,6 +76,7 @@ namespace GariunaiCloud_ToolSharing.Migrations
                             DaysPrice = 12m,
                             Deposit = 10m,
                             Description = "AAAAAAAAAAAAAAAAAAAAAAAA",
+                            Hidden = false,
                             OwnerUserId = 2L,
                             Title = "Irankis"
                         },
@@ -82,6 +87,7 @@ namespace GariunaiCloud_ToolSharing.Migrations
                             DaysPrice = 1m,
                             Deposit = 100m,
                             Description = "DAAAAAAAAAAAAAAAAAAAUG TEEEEEEEEEEEEEEEEEEKSTO",
+                            Hidden = false,
                             OwnerUserId = 1L,
                             Title = "Pjuklas"
                         },
@@ -92,6 +98,7 @@ namespace GariunaiCloud_ToolSharing.Migrations
                             DaysPrice = 0m,
                             Deposit = 1m,
                             Description = "Labai pigu!!!!!!!!!!!!",
+                            Hidden = true,
                             OwnerUserId = 2L,
                             Title = "Dantu krapstukas"
                         });
