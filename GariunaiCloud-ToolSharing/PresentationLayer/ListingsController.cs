@@ -77,7 +77,7 @@ namespace GariunaiCloud_ToolSharing.PresentationLayer
         /// <param name="listingInfo">Listing information</param>
         /// <remarks>Requires authentication</remarks>
         /// <returns>Updated listing object without Owner object</returns>
-        [HttpPost("updateListing")]
+        [HttpPut("updateListing")]
         [Authorize]
         public async Task<IActionResult> UpdateListing(ListingInfo listingInfo)
         {
