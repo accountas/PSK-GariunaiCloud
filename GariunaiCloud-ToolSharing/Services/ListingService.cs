@@ -1,6 +1,7 @@
 ﻿using GariunaiCloud_ToolSharing.DataAccess;
 using GariunaiCloud_ToolSharing.IServices;
 using GariunaiCloud_ToolSharing.Models;
+using GariunaiCloud_ToolSharing.PresentationLayer.DataTransferObjects;
 using Microsoft.EntityFrameworkCore;
 
 namespace GariunaiCloud_ToolSharing.Services;
@@ -57,5 +58,30 @@ public class ListingService : IListingService
             throw new KeyNotFoundException();
 
         return user.Listings;
+    }
+
+    public async Task<Listing?> UpdateListingInfoAsync(Listing listing, string userName)
+    {
+        var owner = await _userService.GetUserByUsernameAsync(userName);
+        if (owner == null)
+            throw new KeyNotFoundException();
+        
+        var existingListing  = await _context.Listings
+            .FirstOrDefaultAsync(l => l.ListingId == listing.ListingId);
+        
+        if (existingListing == null)
+            return null;
+        
+        if (existingListing.Owner.UserId != owner.UserId)
+            throw new Exception("Listing owner doesn't match");
+        
+        existingListing.City = listing.City;
+        existingListing.Deposit = listing.Deposit;
+        existingListing.Description = listing.Description;
+        existingListing.Title = listing.Title;
+        existingListing.DaysPrice = listing.DaysPrice;
+
+        await _context.SaveChangesAsync();
+        return listing;
     }
 }

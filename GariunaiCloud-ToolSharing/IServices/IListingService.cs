@@ -8,4 +8,5 @@ public interface IListingService
     public Task<long> CreateListingAsync(Listing listing, string userName);
     public Task<IList<Listing>> GetListingsAsync();
     public Task<IList<Listing>> GetListingsByUserAsync(string userName);
+    public Task<Listing?> UpdateListingInfoAsync(Listing listing, string userName);
 }

@@ -71,5 +71,27 @@ namespace GariunaiCloud_ToolSharing.PresentationLayer
                 return BadRequest("No such user");
             }
         }
+        /// <summary>
+        /// Edit and existing listing
+        /// </summary>
+        /// <param name="listingInfo">Listing information</param>
+        /// <remarks>Requires authentication</remarks>
+        /// <returns>Updated listing object without Owner object</returns>
+        [HttpPost("updateListing")]
+        [Authorize]
+        public async Task<IActionResult> UpdateListing(ListingInfo listingInfo)
+        {
+            var userName = User.Claims.First(c => c.Type == ClaimTypes.Name).Value;
+            var listing = _mapper.Map<Listing>(listingInfo);
+            try
+            {
+                var newListing = await _listingService.UpdateListingInfoAsync(listing, userName);
+                return Ok(newListing);
+            }
+            catch(KeyNotFoundException)
+            {
+                return BadRequest("No such user");
+            }
+        }
     }
 }
