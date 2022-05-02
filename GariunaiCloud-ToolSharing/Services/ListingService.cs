@@ -21,8 +21,7 @@ public class ListingService : IListingService
         var listing = await _context
             .Listings
             .Include(l => l.Owner)
-            .FirstOrDefaultAsync(l => l.ListingId == listingId);
-
+            .FirstOrDefaultAsync(l => l.ListingId == listingId && l.Hidden == false);
         return listing;
     }
 
@@ -43,15 +42,16 @@ public class ListingService : IListingService
     public async Task<IList<Listing>> GetListingsAsync()
     {
         return await _context.Listings
-            .Include(l => l.Owner)
-            .ToListAsync();
+            .Include(l => l.Owner )
+            .Where(l => l.Hidden == false)
+            .ToListAsync();;
     }
 
     public async Task<IList<Listing>> GetListingsByUserAsync(string userName)
     {
         var user = await _context.Users
-            .Include(u => u.Listings)
-            .FirstOrDefaultAsync(u => u.UserName == userName);
+            .Include(u => u.Listings.Where(listing => listing.Hidden == false))
+            .FirstOrDefaultAsync(u => u.UserName == userName );
 
         if (user == null)
             throw new KeyNotFoundException();

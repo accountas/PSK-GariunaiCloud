@@ -42,7 +42,8 @@ public class GariunaiDbContext : DbContext
                 Title = "Golden Shovel",
                 Description = "alskdjalkdjalskdjalksjdalskdjalksjdwiad", 
                 OwnerUserId = 1L,
-                City = "Klaipėda"
+                City = "Klaipėda",
+                Hidden = false
             },
             new
             {
@@ -52,7 +53,8 @@ public class GariunaiDbContext : DbContext
                 Title = "Irankis", 
                 Description = "AAAAAAAAAAAAAAAAAAAAAAAA",
                 OwnerUserId = 2L,
-                City = "Vilnius"
+                City = "Vilnius",
+                Hidden = false
             },
             new
             {
@@ -61,7 +63,8 @@ public class GariunaiDbContext : DbContext
                 Title = "Pjuklas",
                 Description = "DAAAAAAAAAAAAAAAAAAAUG TEEEEEEEEEEEEEEEEEEKSTO",
                 OwnerUserId = 1L,
-                City = "Kaunas"
+                City = "Kaunas",
+                Hidden = false
             },
             new
             {
@@ -71,7 +74,8 @@ public class GariunaiDbContext : DbContext
                 Title = "Dantu krapstukas",
                 Description = "Labai pigu!!!!!!!!!!!!",
                 OwnerUserId = 2L,
-                City = "Balbieriškis"
+                City = "Balbieriškis",
+                Hidden = true
             }
         );
     }
