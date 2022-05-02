@@ -72,7 +72,7 @@ namespace GariunaiCloud_ToolSharing.PresentationLayer
             }
         }
         /// <summary>
-        /// Edit and existing listing
+        /// Edit an existing listing
         /// </summary>
         /// <param name="listingInfo">Listing information</param>
         /// <remarks>Requires authentication</remarks>
