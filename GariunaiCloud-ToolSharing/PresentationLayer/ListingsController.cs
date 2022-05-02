@@ -83,15 +83,30 @@ namespace GariunaiCloud_ToolSharing.PresentationLayer
         {
             var userName = User.Claims.First(c => c.Type == ClaimTypes.Name).Value;
             var listing = _mapper.Map<Listing>(listingInfo);
-            try
-            {
-                var newListing = await _listingService.UpdateListingInfoAsync(listing, userName);
-                return Ok(newListing);
-            }
-            catch(KeyNotFoundException)
-            {
-                return BadRequest("No such user");
-            }
+            if (!await _listingService.IsByUser(listing.ListingId, userName))
+                return Unauthorized();
+            
+            var newListing = await _listingService.UpdateListingInfoAsync(listing);
+            return Ok(newListing);
+        }
+        /// <summary>
+        /// Delete and existing listing
+        /// </summary>
+        /// <param name="listingId">listingID</param>
+        /// <remarks>Requires authentication</remarks>
+        /// <returns></returns>
+        [HttpDelete("deleteListing")]
+        [Authorize]
+        public async Task<IActionResult> DeleteListing(long listingId)
+        {
+            var userName = User.Claims.First(c => c.Type == ClaimTypes.Name).Value;
+            if (await _listingService.GetListingAsync(listingId) == null)
+                return NotFound();
+            if (!await _listingService.IsByUser(listingId, userName))
+                return Unauthorized();
+
+            await _listingService.DeleteListingAsync(listingId);
+            return Ok();
         }
     }
 }

@@ -60,20 +60,10 @@ public class ListingService : IListingService
         return user.Listings;
     }
 
-    public async Task<Listing?> UpdateListingInfoAsync(Listing listing, string userName)
+    public async Task<Listing?> UpdateListingInfoAsync(Listing listing)
     {
-        var owner = await _userService.GetUserByUsernameAsync(userName);
-        if (owner == null)
-            throw new KeyNotFoundException();
-        
         var existingListing  = await _context.Listings
             .FirstOrDefaultAsync(l => l.ListingId == listing.ListingId);
-        
-        if (existingListing == null)
-            return null;
-        
-        if (existingListing.Owner.UserId != owner.UserId)
-            throw new Exception("Listing owner doesn't match");
         
         existingListing.City = listing.City;
         existingListing.Deposit = listing.Deposit;
@@ -83,5 +73,21 @@ public class ListingService : IListingService
 
         await _context.SaveChangesAsync();
         return listing;
+    }
+
+    public async Task<bool> IsByUser(long listingId, string userName)
+    {
+        var existingListing  = await _context.Listings
+            .AsNoTracking()
+            .Include(u=> u.Owner)
+            .FirstOrDefaultAsync(l => l.ListingId == listingId);
+        return existingListing != null && existingListing.Owner.UserName == userName;
+    }
+    public async Task DeleteListingAsync(long listingId)
+    {
+        var listing  = await _context.Listings
+            .FirstOrDefaultAsync(l => l.ListingId == listingId);
+        _context.Listings.Remove(listing);
+        await _context.SaveChangesAsync();
     }
 }
