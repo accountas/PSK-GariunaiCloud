@@ -11,4 +11,5 @@ public interface IUserService
     public Task<User?> AuthenticateByEmail(string email, string password);
     public Task<User?> UpdateUserInfoAsync(string userName, User user);
     public Task<List<User>> GetUsersAsync();
+    public Task<bool> UserExistsAsync(string username);
 }

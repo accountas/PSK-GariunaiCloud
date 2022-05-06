@@ -58,4 +58,56 @@ public class ListingService : IListingService
 
         return user.Listings;
     }
+
+    public Task<bool> ListingExistsAsync(long listingId)
+    {
+        return _context.Listings.AnyAsync(l => l.ListingId == listingId);
+    }
+
+    public async Task<bool> IsAvailableToRentAsync(long listingId, DateTime startDate, DateTime endDate)
+    {
+        if (!ListingExistsAsync(listingId).Result)
+            return false;
+
+        var busy = await _context
+            .Listings
+            .AsNoTracking()
+            .Where(l => l.ListingId == listingId)
+            .Include(l => l.Orders)
+            .SelectMany(l => l.Orders)
+            .AnyAsync(o =>
+                o.Status != OrderStatus.Pending 
+                && o.Status != OrderStatus.Cancelled
+                && o.EndDate <= endDate
+                && o.StartDate >= startDate
+            );
+        
+        return !busy;
+    }
+
+    public async Task<IList<DateTime>> GetUnavailableDatesAsync(long listingId, DateTime startDate, DateTime endDate)
+    {
+        var orders = await _context
+            .Listings
+            .AsNoTracking()
+            .Where(l => l.ListingId == listingId)
+            .Include(l => l.Orders)
+            .SelectMany(l => l.Orders)
+            .Where(o =>
+                o.Status != OrderStatus.Pending
+                && o.Status != OrderStatus.Cancelled
+                && o.EndDate <= endDate
+                && o.StartDate >= startDate)
+            .ToListAsync();
+
+        var unavailableDates = new HashSet<DateTime>();
+        foreach (var order in orders)
+        {
+            for (var date = order.StartDate; date <= order.EndDate; date = date.AddDays(1))
+            {
+                unavailableDates.Add(date.Date);
+            }
+        }
+        return unavailableDates.ToList();
+    }
 }

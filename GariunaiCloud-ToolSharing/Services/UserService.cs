@@ -1,5 +1,4 @@
-﻿using System.Text.RegularExpressions;
-using GariunaiCloud_ToolSharing.DataAccess;
+﻿using GariunaiCloud_ToolSharing.DataAccess;
 using GariunaiCloud_ToolSharing.IServices;
 using GariunaiCloud_ToolSharing.Models;
 using Microsoft.EntityFrameworkCore;
@@ -107,5 +106,10 @@ public class UserService : IUserService
     public  Task<List<User>> GetUsersAsync()
     {
         return _context.Users.ToListAsync();
+    }
+
+    public Task<bool> UserExistsAsync(string username)
+    {
+        return _context.Users.AnyAsync(u => u.UserName == username);
     }
 }

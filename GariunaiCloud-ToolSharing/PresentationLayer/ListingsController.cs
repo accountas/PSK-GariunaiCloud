@@ -21,7 +21,7 @@ namespace GariunaiCloud_ToolSharing.PresentationLayer
             _listingService = listingService;
             _mapper = mapper;
         }
-        
+
         /// <summary>
         /// Get all listings
         /// </summary>
@@ -32,7 +32,7 @@ namespace GariunaiCloud_ToolSharing.PresentationLayer
             var payload = _mapper.Map<IList<ListingInfo>>(listings);
             return Ok(payload);
         }
-        
+
         /// <summary>
         /// Get listing by id
         /// </summary>
@@ -49,7 +49,7 @@ namespace GariunaiCloud_ToolSharing.PresentationLayer
             var payload = _mapper.Map<ListingInfo>(listing);
             return Ok(payload);
         }
-        
+
         /// <summary>
         /// Create a new listing, returns new listing id
         /// </summary>
@@ -66,10 +66,44 @@ namespace GariunaiCloud_ToolSharing.PresentationLayer
                 var id = await _listingService.CreateListingAsync(listing, userName);
                 return Ok(id);
             }
-            catch(KeyNotFoundException)
+            catch (KeyNotFoundException)
             {
                 return BadRequest("No such user");
             }
+        }
+
+        /// <summary>
+        /// Get listings unavailable dates for a given date range
+        /// </summary>
+        /// <param name="id">Listing id</param>
+        /// <param name="startDate">Start of the interest region</param>
+        /// <param name="endDate">End of interest region</param>
+        [HttpGet("{id:long}/availability")]
+        public async Task<IActionResult> GetUnavailableDates(long id, [FromQuery] string startDate,
+            [FromQuery] string endDate)
+        {
+            DateTime startDateTime, endDateTime;
+            if (!_listingService.ListingExistsAsync(id).Result)
+            {
+                return NotFound();
+            }
+            try
+            {
+                startDateTime = DateTime.Parse(startDate);
+                endDateTime = DateTime.Parse(endDate);
+            }
+            catch (Exception)
+            {
+                return BadRequest("Invalid date format");
+            }
+            if(startDateTime > endDateTime)
+            {
+                return BadRequest("Start date must be before end date");
+            }
+            
+            var unavailableDates = await _listingService.GetUnavailableDatesAsync(id, startDateTime, endDateTime);
+            var dates = unavailableDates.Select(d => d.ToString("yyyy-MM-dd")).ToList();
+            return Ok(dates);
         }
     }
 }
