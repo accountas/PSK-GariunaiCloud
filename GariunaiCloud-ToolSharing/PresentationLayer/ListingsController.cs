@@ -87,7 +87,8 @@ namespace GariunaiCloud_ToolSharing.PresentationLayer
                 return Unauthorized();
             
             var newListing = await _listingService.UpdateListingInfoAsync(listing);
-            return Ok(newListing);
+            var dto = _mapper.Map<ListingInfo>(newListing);
+            return Ok(dto);
         }
         /// <summary>
         /// Delete and existing listing

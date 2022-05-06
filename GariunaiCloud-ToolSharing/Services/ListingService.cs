@@ -63,7 +63,13 @@ public class ListingService : IListingService
     public async Task<Listing?> UpdateListingInfoAsync(Listing listing)
     {
         var existingListing  = await _context.Listings
+            .Include(l => l.Owner)
             .FirstOrDefaultAsync(l => l.ListingId == listing.ListingId);
+
+        if (existingListing == null)
+        {
+            return null;
+        }
         
         existingListing.City = listing.City;
         existingListing.Deposit = listing.Deposit;
