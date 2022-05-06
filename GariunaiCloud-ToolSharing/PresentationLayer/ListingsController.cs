@@ -87,6 +87,7 @@ namespace GariunaiCloud_ToolSharing.PresentationLayer
             {
                 return NotFound();
             }
+
             try
             {
                 startDateTime = DateTime.Parse(startDate);
@@ -96,14 +97,55 @@ namespace GariunaiCloud_ToolSharing.PresentationLayer
             {
                 return BadRequest("Invalid date format");
             }
-            if(startDateTime > endDateTime)
+
+            if (startDateTime > endDateTime)
             {
                 return BadRequest("Start date must be before end date");
             }
-            
+
             var unavailableDates = await _listingService.GetUnavailableDatesAsync(id, startDateTime, endDateTime);
             var dates = unavailableDates.Select(d => d.ToString("yyyy-MM-dd")).ToList();
             return Ok(dates);
+        }
+
+        /// <summary>
+        /// Edit an existing listing
+        /// </summary>
+        /// <param name="listingInfo">Listing information</param>
+        /// <remarks>Requires authentication</remarks>
+        /// <returns>Updated listing object without Owner object</returns>
+        [HttpPut("updateListing")]
+        [Authorize]
+        public async Task<IActionResult> UpdateListing(ListingInfo listingInfo)
+        {
+            var userName = User.Claims.First(c => c.Type == ClaimTypes.Name).Value;
+            var listing = _mapper.Map<Listing>(listingInfo);
+            if (!await _listingService.IsByUser(listing.ListingId, userName))
+                return Unauthorized();
+
+            var newListing = await _listingService.UpdateListingInfoAsync(listing);
+            var dto = _mapper.Map<ListingInfo>(newListing);
+            return Ok(dto);
+        }
+
+        /// <summary>
+        /// Delete and existing listing
+        /// </summary>
+        /// <param name="listingId">listingID</param>
+        /// <remarks>Requires authentication</remarks>
+        /// <returns></returns>
+        [HttpDelete("deleteListing")]
+        [Authorize]
+        public async Task<IActionResult> DeleteListing(long listingId)
+        {
+            var userName = User.Claims.First(c => c.Type == ClaimTypes.Name).Value;
+            if (await _listingService.GetListingAsync(listingId) == null)
+                return NotFound();
+            if (!await _listingService.IsByUser(listingId, userName))
+                return Unauthorized();
+
+            await _listingService.DeleteListingAsync(listingId);
+            return Ok();
         }
     }
 }

@@ -11,4 +11,7 @@ public interface IListingService
     public Task<bool> ListingExistsAsync(long listingId);
     public Task<bool> IsAvailableToRentAsync(long listingId, DateTime startDate, DateTime endDate);
     public Task<IList<DateTime>> GetUnavailableDatesAsync(long listingId, DateTime startDate, DateTime endDate);
+    public Task<Listing?> UpdateListingInfoAsync(Listing listing);
+    public Task DeleteListingAsync(long listingId);
+    public Task<bool> IsByUser(long listingId, string userName);
 }

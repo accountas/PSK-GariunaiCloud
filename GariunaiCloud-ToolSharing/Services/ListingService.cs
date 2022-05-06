@@ -42,16 +42,17 @@ public class ListingService : IListingService
     public async Task<IList<Listing>> GetListingsAsync()
     {
         return await _context.Listings
-            .Include(l => l.Owner )
+            .Include(l => l.Owner)
             .Where(l => l.Hidden == false)
-            .ToListAsync();;
+            .ToListAsync();
+        ;
     }
 
     public async Task<IList<Listing>> GetListingsByUserAsync(string userName)
     {
         var user = await _context.Users
             .Include(u => u.Listings.Where(listing => listing.Hidden == false))
-            .FirstOrDefaultAsync(u => u.UserName == userName );
+            .FirstOrDefaultAsync(u => u.UserName == userName);
 
         if (user == null)
             throw new KeyNotFoundException();
@@ -76,12 +77,12 @@ public class ListingService : IListingService
             .Include(l => l.Orders)
             .SelectMany(l => l.Orders)
             .AnyAsync(o =>
-                o.Status != OrderStatus.Pending 
+                o.Status != OrderStatus.Pending
                 && o.Status != OrderStatus.Cancelled
                 && o.EndDate <= endDate
                 && o.StartDate >= startDate
             );
-        
+
         return !busy;
     }
 
@@ -108,6 +109,45 @@ public class ListingService : IListingService
                 unavailableDates.Add(date.Date);
             }
         }
+
         return unavailableDates.ToList();
+    }
+
+    public async Task<Listing?> UpdateListingInfoAsync(Listing listing)
+    {
+        var existingListing = await _context.Listings
+            .Include(l => l.Owner)
+            .FirstOrDefaultAsync(l => l.ListingId == listing.ListingId);
+
+        if (existingListing == null)
+        {
+            return null;
+        }
+
+        existingListing.City = listing.City;
+        existingListing.Deposit = listing.Deposit;
+        existingListing.Description = listing.Description;
+        existingListing.Title = listing.Title;
+        existingListing.DaysPrice = listing.DaysPrice;
+
+        await _context.SaveChangesAsync();
+        return listing;
+    }
+
+    public async Task<bool> IsByUser(long listingId, string userName)
+    {
+        var existingListing = await _context.Listings
+            .AsNoTracking()
+            .Include(u => u.Owner)
+            .FirstOrDefaultAsync(l => l.ListingId == listingId);
+        return existingListing != null && existingListing.Owner.UserName == userName;
+    }
+
+    public async Task DeleteListingAsync(long listingId)
+    {
+        var listing = await _context.Listings
+            .FirstOrDefaultAsync(l => l.ListingId == listingId);
+        _context.Listings.Remove(listing);
+        await _context.SaveChangesAsync();
     }
 }
