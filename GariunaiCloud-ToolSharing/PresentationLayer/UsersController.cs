@@ -121,7 +121,7 @@ namespace GariunaiCloud_ToolSharing.PresentationLayer
 
             var user = credentials.Username != null
                 ? await _userService.AuthenticateByUsername(credentials.Username, credentials.Password)
-                : await _userService.AuthenticateByEmail(credentials.Email, credentials.Password);
+                : await _userService.AuthenticateByEmail(credentials.Email!, credentials.Password);
             
             if (user == null)
             {
