@@ -1,6 +1,7 @@
 ﻿using GariunaiCloud_ToolSharing.DataAccess;
 using GariunaiCloud_ToolSharing.IServices;
 using GariunaiCloud_ToolSharing.Models;
+using GariunaiCloud_ToolSharing.PresentationLayer.DataTransferObjects;
 using Microsoft.EntityFrameworkCore;
 
 namespace GariunaiCloud_ToolSharing.Services;
@@ -57,5 +58,42 @@ public class ListingService : IListingService
             throw new KeyNotFoundException();
 
         return user.Listings;
+    }
+
+    public async Task<Listing?> UpdateListingInfoAsync(Listing listing)
+    {
+        var existingListing  = await _context.Listings
+            .Include(l => l.Owner)
+            .FirstOrDefaultAsync(l => l.ListingId == listing.ListingId);
+
+        if (existingListing == null)
+        {
+            return null;
+        }
+        
+        existingListing.City = listing.City;
+        existingListing.Deposit = listing.Deposit;
+        existingListing.Description = listing.Description;
+        existingListing.Title = listing.Title;
+        existingListing.DaysPrice = listing.DaysPrice;
+
+        await _context.SaveChangesAsync();
+        return listing;
+    }
+
+    public async Task<bool> IsByUser(long listingId, string userName)
+    {
+        var existingListing  = await _context.Listings
+            .AsNoTracking()
+            .Include(u=> u.Owner)
+            .FirstOrDefaultAsync(l => l.ListingId == listingId);
+        return existingListing != null && existingListing.Owner.UserName == userName;
+    }
+    public async Task DeleteListingAsync(long listingId)
+    {
+        var listing  = await _context.Listings
+            .FirstOrDefaultAsync(l => l.ListingId == listingId);
+        _context.Listings.Remove(listing);
+        await _context.SaveChangesAsync();
     }
 }
