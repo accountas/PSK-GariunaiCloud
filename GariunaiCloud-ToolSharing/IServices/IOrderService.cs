@@ -4,8 +4,8 @@ namespace GariunaiCloud_ToolSharing.IServices;
 
 public interface IOrderService
 {
-    public Task<List<Order>> GetUserPlacedOrdersAsync(string userName);
-    public Task<List<Order>> GetUserListingOrdersAsync(string userName);
+    public Task<List<Order>> GetPlacedOrdersByUserAsync(string userName);
+    public Task<List<Order>> GetReceivedOrdersByUserAsync(string userName);
     public Task<Order?> PlaceOrderAsync(string userName, long listingId, DateTime startDate, DateTime endDate);
     public Task<Order?> GetOrderAsync(long orderId);
     public Task<Order?> UpdateOrderStatusAsync(long orderId, OrderStatus status);

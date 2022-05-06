@@ -16,7 +16,7 @@ public class OrderService : IOrderService
         _listingService = listingService;
     }
 
-    public Task<List<Order>> GetUserPlacedOrdersAsync(string userName)
+    public Task<List<Order>> GetPlacedOrdersByUserAsync(string userName)
     {
         return _context
             .Orders
@@ -27,7 +27,7 @@ public class OrderService : IOrderService
             .ToListAsync();
     }
 
-    public Task<List<Order>> GetUserListingOrdersAsync(string userName)
+    public Task<List<Order>> GetReceivedOrdersByUserAsync(string userName)
     {
         return _context
             .Orders

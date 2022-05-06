@@ -68,7 +68,7 @@ public class OrdersController : Controller
     public async Task<IActionResult> GetPlacedOrders()
     {   
         var userName = User.GetUsername();
-        var orders = await _orderService.GetUserPlacedOrdersAsync(userName);
+        var orders = await _orderService.GetPlacedOrdersByUserAsync(userName);
         var dtos = _mapper.Map<List<OrderPayload>>(orders);
         return Ok(dtos);
     }
@@ -82,7 +82,7 @@ public class OrdersController : Controller
     public async Task<IActionResult> GetReceivedOrders()
     {   
         var userName = User.GetUsername();
-        var orders = await _orderService.GetUserListingOrdersAsync(userName);
+        var orders = await _orderService.GetReceivedOrdersByUserAsync(userName);
         var dtos = _mapper.Map<List<OrderPayload>>(orders);
         return Ok(dtos);
     }
