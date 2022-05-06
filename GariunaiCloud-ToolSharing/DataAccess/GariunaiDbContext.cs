@@ -12,6 +12,7 @@ public class GariunaiDbContext : DbContext
 
     public DbSet<Listing> Listings { get; set; }
     public DbSet<User> Users { get; set; }
+    public DbSet<Order> Orders { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
