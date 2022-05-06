@@ -3,7 +3,6 @@ using AutoMapper;
 using GariunaiCloud_ToolSharing.IServices;
 using GariunaiCloud_ToolSharing.Models;
 using GariunaiCloud_ToolSharing.PresentationLayer.DataTransferObjects;
-using GariunaiCloud_ToolSharing.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -112,15 +111,24 @@ namespace GariunaiCloud_ToolSharing.PresentationLayer
         /// Edit an existing listing
         /// </summary>
         /// <param name="listingInfo">Listing information</param>
+        /// <param name="id">Listing id</param>
         /// <remarks>Requires authentication</remarks>
         /// <returns>Updated listing object without Owner object</returns>
-        [HttpPut("updateListing")]
+        [HttpPut("{id:long}")]
         [Authorize]
-        public async Task<IActionResult> UpdateListing(ListingInfo listingInfo)
+        public async Task<IActionResult> UpdateListing(ListingInfo listingInfo, long id)
         {
             var userName = User.Claims.First(c => c.Type == ClaimTypes.Name).Value;
             var listing = _mapper.Map<Listing>(listingInfo);
-            if (!await _listingService.IsByUser(listing.ListingId, userName))
+            if(!_listingService.ListingExistsAsync(id).Result)
+            {
+                return NotFound();
+            }
+            if (id != listingInfo.ListingId)
+            {
+                return BadRequest("Cant change listing id");
+            }
+            if (!await _listingService.IsByUser(id, userName))
                 return Unauthorized();
 
             var newListing = await _listingService.UpdateListingInfoAsync(listing);
@@ -131,20 +139,20 @@ namespace GariunaiCloud_ToolSharing.PresentationLayer
         /// <summary>
         /// Delete and existing listing
         /// </summary>
-        /// <param name="listingId">listingID</param>
+        /// <param name="id">listingID</param>
         /// <remarks>Requires authentication</remarks>
         /// <returns></returns>
-        [HttpDelete("deleteListing")]
+        [HttpDelete("{id:long}")]
         [Authorize]
-        public async Task<IActionResult> DeleteListing(long listingId)
+        public async Task<IActionResult> DeleteListing(long id)
         {
             var userName = User.Claims.First(c => c.Type == ClaimTypes.Name).Value;
-            if (await _listingService.GetListingAsync(listingId) == null)
+            if (await _listingService.GetListingAsync(id) == null)
                 return NotFound();
-            if (!await _listingService.IsByUser(listingId, userName))
+            if (!await _listingService.IsByUser(id, userName))
                 return Unauthorized();
 
-            await _listingService.DeleteListingAsync(listingId);
+            await _listingService.DeleteListingAsync(id);
             return Ok();
         }
     }
