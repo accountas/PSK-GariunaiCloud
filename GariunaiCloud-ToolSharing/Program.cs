@@ -19,6 +19,7 @@ builder.Services.AddDbContext<GariunaiDbContext>(options =>
 //add services
 builder.Services.AddScoped<IListingService, ListingService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddSingleton<IPasswordHashingStrategy, Hmacsha512PasswordHashingStrategy>();
 builder.Services.AddSingleton<IJwtTokenService, JwtTokenService>();
 
@@ -62,6 +63,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 using (var context = scope.ServiceProvider.GetRequiredService<GariunaiDbContext>())
 {
+    // context.Database.EnsureDeleted();
     context.Database.Migrate();
 }
 

@@ -1,11 +1,17 @@
-﻿namespace GariunaiCloud_ToolSharing.PresentationLayer.DataTransferObjects;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace GariunaiCloud_ToolSharing.PresentationLayer.DataTransferObjects;
 
 #nullable disable
 public class NewListingPayload
 {
-    public string City { get; set; }
-    public string Title { get; set; }
-    public string Description { get; set; }
-    public decimal Deposit { get; set; }
-    public decimal DaysPrice { get; set; }
+    [Required] public string City { get; set; }
+
+    [Required] public string Title { get; set; }
+
+    [Required] public string Description { get; set; }
+
+    [Required] public decimal Deposit { get; set; }
+
+    [Required] public decimal DaysPrice { get; set; }
 }

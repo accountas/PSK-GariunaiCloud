@@ -18,5 +18,11 @@ public class AutoMapperProfiles : Profile
         
         CreateMap<NewListingPayload, Listing>()
             .ReverseMap();
+
+        CreateMap<Order, OrderPayload>()
+            .ForMember(dto => dto.ListingId, opt
+                => opt.MapFrom(src => src.Listing.ListingId))
+            .ForMember(dto => dto.PlacerUsername, opt
+                => opt.MapFrom(src => src.User.UserName));
     }
 }

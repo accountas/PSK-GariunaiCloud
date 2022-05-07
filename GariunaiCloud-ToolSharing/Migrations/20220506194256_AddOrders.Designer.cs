@@ -4,6 +4,7 @@ using GariunaiCloud_ToolSharing.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GariunaiCloud_ToolSharing.Migrations
 {
     [DbContext(typeof(GariunaiDbContext))]
-    partial class GariunaiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220506194256_AddOrders")]
+    partial class AddOrders
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -112,10 +114,10 @@ namespace GariunaiCloud_ToolSharing.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("OrderId"), 1L, 1);
 
-                    b.Property<DateTime?>("CompletionDateTime")
+                    b.Property<DateTime>("CompletionDateTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("ConfirmationDateTime")
+                    b.Property<DateTime>("ConfirmationDateTime")
                         .HasColumnType("datetime2");
 
                     b.Property<decimal>("Deposit")

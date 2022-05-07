@@ -11,6 +11,8 @@ public class User
     public byte[] PasswordSalt { get; set; }
     public UserRole Role { get; set; } = UserRole.User;
     public List<Listing> Listings { get; set; }
+    
+    public List<Order> Orders { get; set; }
 }
 
 public enum UserRole

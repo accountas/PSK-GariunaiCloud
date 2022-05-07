@@ -11,4 +11,6 @@ public class Listing
     public decimal Deposit { get; set; }
     public bool Hidden { get; set; }
     public User Owner { get; set; }
+
+    public List<Order> Orders { get; set; }
 }

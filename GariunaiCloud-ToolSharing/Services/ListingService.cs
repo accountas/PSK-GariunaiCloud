@@ -1,7 +1,6 @@
 ﻿using GariunaiCloud_ToolSharing.DataAccess;
 using GariunaiCloud_ToolSharing.IServices;
 using GariunaiCloud_ToolSharing.Models;
-using GariunaiCloud_ToolSharing.PresentationLayer.DataTransferObjects;
 using Microsoft.EntityFrameworkCore;
 
 namespace GariunaiCloud_ToolSharing.Services;
@@ -43,16 +42,17 @@ public class ListingService : IListingService
     public async Task<IList<Listing>> GetListingsAsync()
     {
         return await _context.Listings
-            .Include(l => l.Owner )
+            .Include(l => l.Owner)
             .Where(l => l.Hidden == false)
-            .ToListAsync();;
+            .ToListAsync();
+        ;
     }
 
     public async Task<IList<Listing>> GetListingsByUserAsync(string userName)
     {
         var user = await _context.Users
             .Include(u => u.Listings.Where(listing => listing.Hidden == false))
-            .FirstOrDefaultAsync(u => u.UserName == userName );
+            .FirstOrDefaultAsync(u => u.UserName == userName);
 
         if (user == null)
             throw new KeyNotFoundException();
@@ -60,9 +60,62 @@ public class ListingService : IListingService
         return user.Listings;
     }
 
+    public Task<bool> ListingExistsAsync(long listingId)
+    {
+        return _context.Listings.AnyAsync(l => l.ListingId == listingId);
+    }
+
+    public async Task<bool> IsAvailableToRentAsync(long listingId, DateTime startDate, DateTime endDate)
+    {
+        if (!ListingExistsAsync(listingId).Result)
+            return false;
+
+        var busy = await _context
+            .Listings
+            .AsNoTracking()
+            .Where(l => l.ListingId == listingId)
+            .Include(l => l.Orders)
+            .SelectMany(l => l.Orders)
+            .AnyAsync(o =>
+                o.Status != OrderStatus.Pending
+                && o.Status != OrderStatus.Cancelled
+                && o.EndDate <= endDate
+                && o.StartDate >= startDate
+            );
+
+        return !busy;
+    }
+
+    public async Task<IList<DateTime>> GetUnavailableDatesAsync(long listingId, DateTime startDate, DateTime endDate)
+    {
+        var orders = await _context
+            .Listings
+            .AsNoTracking()
+            .Where(l => l.ListingId == listingId)
+            .Include(l => l.Orders)
+            .SelectMany(l => l.Orders)
+            .Where(o =>
+                o.Status != OrderStatus.Pending
+                && o.Status != OrderStatus.Cancelled
+                && o.EndDate <= endDate
+                && o.StartDate >= startDate)
+            .ToListAsync();
+
+        var unavailableDates = new HashSet<DateTime>();
+        foreach (var order in orders)
+        {
+            for (var date = order.StartDate; date <= order.EndDate; date = date.AddDays(1))
+            {
+                unavailableDates.Add(date.Date);
+            }
+        }
+
+        return unavailableDates.ToList();
+    }
+
     public async Task<Listing?> UpdateListingInfoAsync(Listing listing)
     {
-        var existingListing  = await _context.Listings
+        var existingListing = await _context.Listings
             .Include(l => l.Owner)
             .FirstOrDefaultAsync(l => l.ListingId == listing.ListingId);
 
@@ -70,7 +123,7 @@ public class ListingService : IListingService
         {
             return null;
         }
-        
+
         existingListing.City = listing.City;
         existingListing.Deposit = listing.Deposit;
         existingListing.Description = listing.Description;
@@ -83,15 +136,16 @@ public class ListingService : IListingService
 
     public async Task<bool> IsByUser(long listingId, string userName)
     {
-        var existingListing  = await _context.Listings
+        var existingListing = await _context.Listings
             .AsNoTracking()
-            .Include(u=> u.Owner)
+            .Include(u => u.Owner)
             .FirstOrDefaultAsync(l => l.ListingId == listingId);
         return existingListing != null && existingListing.Owner.UserName == userName;
     }
+
     public async Task DeleteListingAsync(long listingId)
     {
-        var listing  = await _context.Listings
+        var listing = await _context.Listings
             .FirstOrDefaultAsync(l => l.ListingId == listingId);
         _context.Listings.Remove(listing);
         await _context.SaveChangesAsync();
