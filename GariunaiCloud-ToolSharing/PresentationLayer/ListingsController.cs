@@ -160,8 +160,8 @@ namespace GariunaiCloud_ToolSharing.PresentationLayer
         /// </summary>
         /// <param name="searchString"></param>
         /// <returns>Return listings that contain the searchString in their titles</returns>
-        [HttpGet("{searchString}")]
-        public async Task<IActionResult> SearchListings(string searchString)
+        [HttpGet()]
+        public async Task<IActionResult> SearchListings([FromQuery]string searchString)
         {
             var listings = await _listingService.SearchListingsAsync(searchString);
             var payload = _mapper.Map<IList<ListingInfo>>(listings);

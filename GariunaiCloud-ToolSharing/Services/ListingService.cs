@@ -156,7 +156,7 @@ public class ListingService : IListingService
         {
             return await _context.Listings
                 .Include(l => l.Owner)
-                .Where(l => l.Hidden == false && l.Title!.Contains(searchString))
+                .Where(l => l.Hidden == false && l.Title.ToLower().Contains(searchString.ToLower()))
                 .ToListAsync();
         }
         return null;
