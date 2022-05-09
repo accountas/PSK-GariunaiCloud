@@ -15,4 +15,6 @@ public interface IListingService
     public Task DeleteListingAsync(long listingId);
     public Task<bool> IsByUser(long listingId, string userName);
     public Task<IList<Listing>?> SearchListingsAsync(string searchString);
+    public Task<IList<Listing>?> FilterListingsAsync(string? searchString, int maxPrice, string? city);
+    public List<Listing> SortListings(string? sortOrder, IList<Listing>? listings);
 }
