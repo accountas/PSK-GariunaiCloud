@@ -150,4 +150,15 @@ public class ListingService : IListingService
         _context.Listings.Remove(listing);
         await _context.SaveChangesAsync();
     }
+    public async Task<IList<Listing>?> SearchListingsAsync(string searchString)
+    {
+        if (!String.IsNullOrEmpty(searchString))
+        {
+            return await _context.Listings
+                .Include(l => l.Owner)
+                .Where(l => l.Hidden == false && l.Title.ToLower().Contains(searchString.ToLower()))
+                .ToListAsync();
+        }
+        return null;
+    }
 }

@@ -14,4 +14,5 @@ public interface IListingService
     public Task<Listing?> UpdateListingInfoAsync(Listing listing);
     public Task DeleteListingAsync(long listingId);
     public Task<bool> IsByUser(long listingId, string userName);
+    public Task<IList<Listing>?> SearchListingsAsync(string searchString);
 }

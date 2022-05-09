@@ -155,5 +155,17 @@ namespace GariunaiCloud_ToolSharing.PresentationLayer
             await _listingService.DeleteListingAsync(id);
             return Ok();
         }
+        /// <summary>
+        /// Search for listings that match some string
+        /// </summary>
+        /// <param name="searchString"></param>
+        /// <returns>Return listings that contain the searchString in their titles</returns>
+        [HttpGet()]
+        public async Task<IActionResult> SearchListings([FromQuery]string searchString)
+        {
+            var listings = await _listingService.SearchListingsAsync(searchString);
+            var payload = _mapper.Map<IList<ListingInfo>>(listings);
+            return Ok(payload);
+        }
     }
 }
