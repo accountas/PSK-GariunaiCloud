@@ -2,6 +2,7 @@
 using GariunaiCloud_ToolSharing.IServices;
 using GariunaiCloud_ToolSharing.Models;
 using Microsoft.EntityFrameworkCore;
+using static System.String;
 
 namespace GariunaiCloud_ToolSharing.Services;
 
@@ -152,7 +153,7 @@ public class ListingService : IListingService
     }
     public async Task<IList<Listing>?> SearchListingsAsync(string searchString)
     {
-        if (!String.IsNullOrEmpty(searchString))
+        if (!IsNullOrEmpty(searchString))
         {
             return await _context.Listings
                 .Include(l => l.Owner)
@@ -161,4 +162,46 @@ public class ListingService : IListingService
         }
         return null;
     }
+    public async Task<IList<Listing>?> FilterListingsAsync(string? searchString, int maxPrice, string? city)
+    {
+        var listings =  await _context.Listings
+                .Include(l => l.Owner)
+                .Where(l => l.Hidden == false && l.DaysPrice <= maxPrice)
+                .ToListAsync();
+        return FilterByParams(listings, searchString, city);
+    }
+    public List<Listing> SortListings(string? sortOrder, IList<Listing>? listings)
+    {
+        if (listings == null)
+            return null;
+        var newListings = listings.OrderBy(l => l.Title);
+        newListings = sortOrder switch
+        {
+            "name_desc" => listings.OrderByDescending(l => l.Title),
+            "price_asc" => listings.OrderBy(l => l.DaysPrice),
+            "price_desc" => listings.OrderByDescending(l => l.DaysPrice),
+            _ => newListings
+        };
+        
+        return newListings.ToList();
+    }
+
+    private static List<Listing>? FilterByParams(List<Listing> listings,string? searchString=null, string? city=null)
+    {
+        if (!IsNullOrEmpty(searchString) && !IsNullOrEmpty(city))
+        {
+            return listings.Where(l => l.City.ToLower().Contains(city.ToLower()) && l.Title.ToLower().Contains(searchString.ToLower())).ToList();
+        }
+        if (!IsNullOrEmpty(city))
+        {
+            return listings.Where(l => l.City.ToLower().Contains(city.ToLower())).ToList();
+        }
+        if (!IsNullOrEmpty(searchString))
+        {
+            return listings.Where(l => l.Title.ToLower().Contains(searchString.ToLower())).ToList();
+        }
+
+        return listings;
+    }
+
 }

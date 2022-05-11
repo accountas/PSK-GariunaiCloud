@@ -164,8 +164,46 @@ namespace GariunaiCloud_ToolSharing.PresentationLayer
         public async Task<IActionResult> SearchListings([FromQuery]string searchString)
         {
             var listings = await _listingService.SearchListingsAsync(searchString);
+            if (listings == null)
+            {
+                return NotFound();
+            }
             var payload = _mapper.Map<IList<ListingInfo>>(listings);
             return Ok(payload);
         }
+        /// <summary>
+        /// This request filters by given parameters and also sorts. All parameters all optional. 
+        /// </summary>
+        /// <param name="searchString">Title string to be searched for</param>
+        /// <param name="maxPrice">The maximum DAILY price the renter wants to filter as an integer</param>
+        /// <param name="city">City string to be searched for</param>
+        /// <param name="sortOrder">The order which the list should be sorted. Available options: name_desc, price_desc, price_asc. Default: name ascending</param>
+        /// <returns>List of sorted and filtered listings</returns>
+        [HttpGet("/filter")]
+        public async Task<IActionResult> SortFilterListings([FromQuery]string? searchString = null, [FromQuery]int maxPrice = int.MaxValue, [FromQuery]string? city = null, [FromQuery]string? sortOrder = null)
+        {
+            var listings = await _listingService.FilterListingsAsync(searchString, maxPrice, city);
+            if (listings == null)
+            {
+                return NotFound();
+            }
+            var sortedListings = _listingService.SortListings(sortOrder, listings);
+            var payload = _mapper.Map<IList<ListingInfo>>(sortedListings);
+            return Ok(payload);
+        }
+        /// <summary>
+        /// Sorts all listings
+        /// </summary>
+        /// <param name="sortOrder">The order which the list should be sorted. This is an OPTIONAL parameter. Available options: name_desc, price_desc, price_asc, name_asc. Default is name_asc</param>
+        /// <returns>List of sorted listings</returns>
+        [HttpGet("sort/{sortOrder?}")]
+        public async Task<IActionResult> SortListings(string? sortOrder)
+        {
+            var listings = await _listingService.GetListingsAsync();
+            var sortedListings = _listingService.SortListings(sortOrder, listings);
+            var payload = _mapper.Map<IList<ListingInfo>>(sortedListings);
+            return Ok(payload);
+        }
+        
     }
 }
