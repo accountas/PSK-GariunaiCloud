@@ -10,10 +10,9 @@ public class AutoMapperProfiles : Profile
         CreateMap<User, UserInfo>()
             .ReverseMap();
         
-        
         CreateMap<ListingInfo, Listing>();
         CreateMap<Listing, ListingInfo>()
-            .ForMember(dto => dto.OwnerUsername, opt 
+            .ForMember(dto => dto.OwnerUsername, opt
                 => opt.MapFrom(src => src.Owner.UserName));
         
         CreateMap<NewListingPayload, Listing>()

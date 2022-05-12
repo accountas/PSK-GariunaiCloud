@@ -20,6 +20,7 @@ builder.Services.AddDbContext<GariunaiDbContext>(options =>
 builder.Services.AddScoped<IListingService, ListingService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddSingleton<IPasswordHashingStrategy, Hmacsha512PasswordHashingStrategy>();
 builder.Services.AddSingleton<IJwtTokenService, JwtTokenService>();
 

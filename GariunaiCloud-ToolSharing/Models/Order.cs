@@ -7,7 +7,6 @@ namespace GariunaiCloud_ToolSharing.Models;
 public class Order
 {
     public long OrderId { get; set; }
-
     [Column(TypeName = "Date")] public DateTime StartDate { get; set; }
     [Column(TypeName = "Date")] public DateTime EndDate { get; set; }
     public DateTime PlacementDateTime { get; set; }

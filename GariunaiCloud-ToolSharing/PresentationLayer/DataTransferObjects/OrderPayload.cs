@@ -3,6 +3,7 @@ using GariunaiCloud_ToolSharing.Models;
 
 namespace GariunaiCloud_ToolSharing.PresentationLayer.DataTransferObjects;
 
+#nullable disable
 public class OrderPayload
 {
     public long OrderId { get; set; }

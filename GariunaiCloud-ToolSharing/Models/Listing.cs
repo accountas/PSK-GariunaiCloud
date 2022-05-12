@@ -1,4 +1,6 @@
-﻿namespace GariunaiCloud_ToolSharing.Models;
+﻿using System.Net.Mime;
+
+namespace GariunaiCloud_ToolSharing.Models;
 
 #nullable disable
 public class Listing
@@ -11,6 +13,6 @@ public class Listing
     public decimal Deposit { get; set; }
     public bool Hidden { get; set; }
     public User Owner { get; set; }
-
     public List<Order> Orders { get; set; }
+    public DbImage Image { get; set; }
 }

@@ -13,21 +13,23 @@ namespace GariunaiCloud_ToolSharing.PresentationLayer
     public class ListingsController : ControllerBase
     {
         private readonly IListingService _listingService;
+        private readonly IImageService _imageService;
         private readonly IMapper _mapper;
 
-        public ListingsController(IListingService listingService, IMapper mapper)
+        public ListingsController(IListingService listingService, IMapper mapper, IImageService imageService)
         {
             _listingService = listingService;
             _mapper = mapper;
+            _imageService = imageService;
         }
 
         /// <summary>
         /// Get all listings
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> GetListings()
+        public async Task<IActionResult> GetListings([FromQuery] ListingsFilter filters)
         {
-            var listings = await _listingService.GetListingsAsync();
+            var listings = await _listingService.GetListingsAsync(filters);
             var payload = _mapper.Map<IList<ListingInfo>>(listings);
             return Ok(payload);
         }
@@ -58,7 +60,7 @@ namespace GariunaiCloud_ToolSharing.PresentationLayer
         [Authorize]
         public async Task<IActionResult> CreateListing(NewListingPayload listingInfo)
         {
-            var userName = User.Claims.First(c => c.Type == ClaimTypes.Name).Value;
+            var userName = User.GetUsername();
             var listing = _mapper.Map<Listing>(listingInfo);
             try
             {
@@ -116,7 +118,7 @@ namespace GariunaiCloud_ToolSharing.PresentationLayer
         /// <returns>Updated listing object without Owner object</returns>
         [HttpPut("{id:long}")]
         [Authorize]
-        public async Task<IActionResult> UpdateListing(ListingInfo listingInfo, long id)
+        public async Task<IActionResult> UpdateListing(NewListingPayload listingInfo, long id)
         {
             var userName = User.Claims.First(c => c.Type == ClaimTypes.Name).Value;
             var listing = _mapper.Map<Listing>(listingInfo);
@@ -124,13 +126,9 @@ namespace GariunaiCloud_ToolSharing.PresentationLayer
             {
                 return NotFound();
             }
-            if (id != listingInfo.ListingId)
-            {
-                return BadRequest("Cant change listing id");
-            }
             if (!await _listingService.IsByUser(id, userName))
                 return Unauthorized();
-
+            
             var newListing = await _listingService.UpdateListingInfoAsync(listing);
             var dto = _mapper.Map<ListingInfo>(newListing);
             return Ok(dto);
@@ -155,55 +153,44 @@ namespace GariunaiCloud_ToolSharing.PresentationLayer
             await _listingService.DeleteListingAsync(id);
             return Ok();
         }
-        /// <summary>
-        /// Search for listings that match some string
-        /// </summary>
-        /// <param name="searchString"></param>
-        /// <returns>Return listings that contain the searchString in their titles</returns>
-        [HttpGet("/search")]
-        public async Task<IActionResult> SearchListings([FromQuery]string searchString)
+
+        [HttpGet("/{id:long}/image")]
+        public async Task<IActionResult> GetListingImage(long id)
         {
-            var listings = await _listingService.SearchListingsAsync(searchString);
-            if (listings == null)
+            var listing = await _listingService.GetListingAsync(id);
+            if (listing == null) 
             {
                 return NotFound();
             }
-            var payload = _mapper.Map<IList<ListingInfo>>(listings);
-            return Ok(payload);
-        }
-        /// <summary>
-        /// This request filters by given parameters and also sorts. All parameters all optional. 
-        /// </summary>
-        /// <param name="searchString">Title string to be searched for</param>
-        /// <param name="maxPrice">The maximum DAILY price the renter wants to filter as an integer</param>
-        /// <param name="city">City string to be searched for</param>
-        /// <param name="sortOrder">The order which the list should be sorted. Available options: name_desc, price_desc, price_asc. Default: name ascending</param>
-        /// <returns>List of sorted and filtered listings</returns>
-        [HttpGet("/filter")]
-        public async Task<IActionResult> SortFilterListings([FromQuery]string? searchString = null, [FromQuery]int maxPrice = int.MaxValue, [FromQuery]string? city = null, [FromQuery]string? sortOrder = null)
-        {
-            var listings = await _listingService.FilterListingsAsync(searchString, maxPrice, city);
-            if (listings == null)
+            if(listing.Image == null)
             {
                 return NotFound();
             }
-            var sortedListings = _listingService.SortListings(sortOrder, listings);
-            var payload = _mapper.Map<IList<ListingInfo>>(sortedListings);
-            return Ok(payload);
+            return File(listing.Image.ImageData, "image/jpeg");
         }
-        /// <summary>
-        /// Sorts all listings
-        /// </summary>
-        /// <param name="sortOrder">The order which the list should be sorted. This is an OPTIONAL parameter. Available options: name_desc, price_desc, price_asc, name_asc. Default is name_asc</param>
-        /// <returns>List of sorted listings</returns>
-        [HttpGet("sort/{sortOrder?}")]
-        public async Task<IActionResult> SortListings(string? sortOrder)
+        [HttpPut("/{id:long}/image")]
+        [Authorize]
+        public async Task<IActionResult> GetListingImage(long id, IFormFile file)
         {
-            var listings = await _listingService.GetListingsAsync();
-            var sortedListings = _listingService.SortListings(sortOrder, listings);
-            var payload = _mapper.Map<IList<ListingInfo>>(sortedListings);
-            return Ok(payload);
+            if(!_listingService.ListingExistsAsync(id).Result)
+            {
+                return NotFound();
+            }
+            if (!_listingService.IsByUser(id, User.GetUsername()).Result)
+            {
+                return Unauthorized();
+            }
+
+            DbImage image;
+            using (var memoryStream = new MemoryStream())
+            {
+                await file.CopyToAsync(memoryStream);
+                image = await _imageService.UploadImageAsync(memoryStream.ToArray());
+            }
+
+            await _listingService.SetImageAsync(id, image);
+            return Ok();
         }
-        
+
     }
 }

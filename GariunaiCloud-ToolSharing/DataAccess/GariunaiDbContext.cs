@@ -14,6 +14,8 @@ public class GariunaiDbContext : DbContext
     public DbSet<User> Users { get; set; }
     public DbSet<Order> Orders { get; set; }
 
+    public DbSet<DbImage> Images { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<User>()
@@ -22,6 +24,10 @@ public class GariunaiDbContext : DbContext
         
         modelBuilder.Entity<User>()
             .HasIndex(u => u.Email)
+            .IsUnique();
+        
+        modelBuilder.Entity<DbImage>()
+            .HasIndex(u => u.Name)
             .IsUnique();
         
         _seedData(modelBuilder);

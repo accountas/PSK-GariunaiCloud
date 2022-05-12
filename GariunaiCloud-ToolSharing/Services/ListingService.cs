@@ -22,6 +22,7 @@ public class ListingService : IListingService
         var listing = await _context
             .Listings
             .Include(l => l.Owner)
+            .Include(l => l.Image)
             .FirstOrDefaultAsync(l => l.ListingId == listingId && l.Hidden == false);
         return listing;
     }
@@ -39,14 +40,47 @@ public class ListingService : IListingService
         await _context.SaveChangesAsync();
         return listing.ListingId;
     }
-
-    public async Task<IList<Listing>> GetListingsAsync()
+    public async Task<IList<Listing>> GetListingsAsync(ListingsFilter filter)
     {
-        return await _context.Listings
+        var listings = _context.Listings
             .Include(l => l.Owner)
             .Where(l => l.Hidden == false)
-            .ToListAsync();
-        ;
+            .AsNoTracking()
+            .ToListAsync() //TODO: optimize
+            .Result
+            .Where(l => _filterListing(l, filter));
+            
+
+        var listingsSorted = filter.SortOrder switch
+        {
+            ListingSortOrder.NameAsc => listings.OrderBy(l => l.Title.ToLower()),
+            ListingSortOrder.NameDesc => listings.OrderByDescending(l => l.Title.ToLower()),
+            ListingSortOrder.PriceAsc => listings.OrderBy(l => l.DaysPrice),
+            ListingSortOrder.PriceDesc => listings.OrderByDescending(l => l.DaysPrice),
+            _ => throw new ArgumentOutOfRangeException()
+        };
+        
+
+        return listingsSorted.ToList();
+    }
+
+    private bool _filterListing(Listing listing, ListingsFilter filter)
+    {
+        if (!IsNullOrEmpty(filter.TitleQuery))
+        {
+            if (listing.Title == null) return false;
+            if (!listing.Title.ToLower().Contains(filter.TitleQuery.ToLower())) return false;
+        }
+
+        if (!IsNullOrEmpty(filter.City))
+        {
+            if (listing.City == null) return false;
+            if (!string.Equals(listing.City, filter.City, StringComparison.CurrentCultureIgnoreCase)) return false;
+        }
+
+        if (filter.MaxPrice != null && listing.DaysPrice > filter.MaxPrice) return false;
+        
+        return true;
     }
 
     public async Task<IList<Listing>> GetListingsByUserAsync(string userName)
@@ -148,6 +182,8 @@ public class ListingService : IListingService
     {
         var listing = await _context.Listings
             .FirstOrDefaultAsync(l => l.ListingId == listingId);
+        
+        if (listing == null) return;
         _context.Listings.Remove(listing);
         await _context.SaveChangesAsync();
     }
@@ -162,46 +198,14 @@ public class ListingService : IListingService
         }
         return null;
     }
-    public async Task<IList<Listing>?> FilterListingsAsync(string? searchString, int maxPrice, string? city)
+    
+    public async Task SetImageAsync(long listingId, DbImage image)
     {
-        var listings =  await _context.Listings
-                .Include(l => l.Owner)
-                .Where(l => l.Hidden == false && l.DaysPrice <= maxPrice)
-                .ToListAsync();
-        return FilterByParams(listings, searchString, city);
-    }
-    public List<Listing> SortListings(string? sortOrder, IList<Listing>? listings)
-    {
-        if (listings == null)
-            return null;
-        var newListings = listings.OrderBy(l => l.Title);
-        newListings = sortOrder switch
-        {
-            "name_desc" => listings.OrderByDescending(l => l.Title),
-            "price_asc" => listings.OrderBy(l => l.DaysPrice),
-            "price_desc" => listings.OrderByDescending(l => l.DaysPrice),
-            _ => newListings
-        };
+        var listing = _context.Listings.FirstOrDefault(l => l.ListingId == listingId);
+        if (listing == null)
+            return;
         
-        return newListings.ToList();
+        listing.Image = image;
+        await _context.SaveChangesAsync();
     }
-
-    private static List<Listing>? FilterByParams(List<Listing> listings,string? searchString=null, string? city=null)
-    {
-        if (!IsNullOrEmpty(searchString) && !IsNullOrEmpty(city))
-        {
-            return listings.Where(l => l.City.ToLower().Contains(city.ToLower()) && l.Title.ToLower().Contains(searchString.ToLower())).ToList();
-        }
-        if (!IsNullOrEmpty(city))
-        {
-            return listings.Where(l => l.City.ToLower().Contains(city.ToLower())).ToList();
-        }
-        if (!IsNullOrEmpty(searchString))
-        {
-            return listings.Where(l => l.Title.ToLower().Contains(searchString.ToLower())).ToList();
-        }
-
-        return listings;
-    }
-
 }
