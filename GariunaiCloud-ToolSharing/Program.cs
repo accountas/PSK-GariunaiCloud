@@ -2,7 +2,7 @@ using System.Reflection;
 using System.Text;
 using GariunaiCloud_ToolSharing.DataAccess;
 using GariunaiCloud_ToolSharing.IServices;
-using GariunaiCloud_ToolSharing.PresentationLayer.DataTransferObjects;
+using GariunaiCloud_ToolSharing.Controllers.DataTransferObjects;
 using GariunaiCloud_ToolSharing.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -17,9 +17,13 @@ builder.Services.AddDbContext<GariunaiDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("GariunaiDatabase")));
 
 //add services
+builder.Services.AddScoped<IAccessLogger, AccessLogger>();
 builder.Services.AddScoped<IListingService, ListingService>();
+builder.Services.Decorate<IListingService, LoggedListingService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.Decorate<IUserService, LoggedUserService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.Decorate<IOrderService, LoggedOrderService>();
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddSingleton<IPasswordHashingStrategy, Hmacsha512PasswordHashingStrategy>();
 builder.Services.AddSingleton<IJwtTokenService, JwtTokenService>();
@@ -56,6 +60,7 @@ builder.Services.AddSwaggerGen(options => {
 builder.Services.AddAutoMapper(typeof(AutoMapperProfiles));
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddHttpContextAccessor();
 
 //build app
 var app = builder.Build();

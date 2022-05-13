@@ -1,12 +1,11 @@
-﻿using System.Text.Json.Serialization;
-using AutoMapper;
+﻿using AutoMapper;
+using GariunaiCloud_ToolSharing.Controllers.DataTransferObjects;
 using GariunaiCloud_ToolSharing.IServices;
 using GariunaiCloud_ToolSharing.Models;
-using GariunaiCloud_ToolSharing.PresentationLayer.DataTransferObjects;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace GariunaiCloud_ToolSharing.PresentationLayer;
+namespace GariunaiCloud_ToolSharing.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]

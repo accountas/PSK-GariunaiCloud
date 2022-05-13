@@ -1,14 +1,14 @@
 using System.Security.Claims;
 using System.Text.RegularExpressions;
 using AutoMapper;
+using GariunaiCloud_ToolSharing.Controllers.DataTransferObjects;
 using GariunaiCloud_ToolSharing.IServices;
 using GariunaiCloud_ToolSharing.Models;
-using GariunaiCloud_ToolSharing.PresentationLayer.DataTransferObjects;
 using GariunaiCloud_ToolSharing.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace GariunaiCloud_ToolSharing.PresentationLayer
+namespace GariunaiCloud_ToolSharing.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -53,6 +53,26 @@ namespace GariunaiCloud_ToolSharing.PresentationLayer
             var dto = _mapper.Map<UserInfo>(user);
             return Ok(dto);
         }
+        
+        /// <summary>
+        /// Get user by username
+        /// </summary>
+        /// <param name="username"></param>
+        /// <returns></returns>
+        [HttpGet("me")]
+        [Authorize]
+        public async Task<IActionResult> GetUser()
+        {
+            var userName = User.GetUsername();
+            var user = await _userService.GetUserByUsernameAsync(userName);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var dto = _mapper.Map<UserInfo>(user);
+            return Ok(dto);
+        }
 
         /// <summary>
         /// Update your account information
@@ -61,7 +81,7 @@ namespace GariunaiCloud_ToolSharing.PresentationLayer
         /// Json of fields to update. Username change is not allowed.
         /// </param>
         /// <remarks>Requres auth</remarks>
-        [HttpPost("updateInfo")]
+        [HttpPost("me")]
         [Authorize]
         public async Task<IActionResult> UpdateInfo(UserInfo userInfo)
         {

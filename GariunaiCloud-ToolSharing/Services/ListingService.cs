@@ -40,32 +40,38 @@ public class ListingService : IListingService
         await _context.SaveChangesAsync();
         return listing.ListingId;
     }
+
     public async Task<IList<Listing>> GetListingsAsync(ListingsFilter filter)
     {
-        var listings = _context.Listings
+        var listings = await _context.Listings
             .Include(l => l.Owner)
             .Where(l => l.Hidden == false)
             .AsNoTracking()
-            .ToListAsync() //TODO: optimize
-            .Result
+            .ToListAsync(); //TODO: optimize
+
+        var filteredListings = listings
             .Where(l => _filterListing(l, filter));
-            
 
         var listingsSorted = filter.SortOrder switch
         {
-            ListingSortOrder.NameAsc => listings.OrderBy(l => l.Title.ToLower()),
-            ListingSortOrder.NameDesc => listings.OrderByDescending(l => l.Title.ToLower()),
-            ListingSortOrder.PriceAsc => listings.OrderBy(l => l.DaysPrice),
-            ListingSortOrder.PriceDesc => listings.OrderByDescending(l => l.DaysPrice),
+            ListingSortOrder.NameAsc => filteredListings.OrderBy(l => l.Title.ToLower()),
+            ListingSortOrder.NameDesc => filteredListings.OrderByDescending(l => l.Title.ToLower()),
+            ListingSortOrder.PriceAsc => filteredListings.OrderBy(l => l.DaysPrice),
+            ListingSortOrder.PriceDesc => filteredListings.OrderByDescending(l => l.DaysPrice),
             _ => throw new ArgumentOutOfRangeException()
         };
         
-
         return listingsSorted.ToList();
     }
 
     private bool _filterListing(Listing listing, ListingsFilter filter)
     {
+        if (!IsNullOrEmpty(filter.Username))
+        {
+            if (listing.Owner.Username != filter.Username)
+                return false;
+        }
+
         if (!IsNullOrEmpty(filter.TitleQuery))
         {
             if (listing.Title == null) return false;
@@ -79,7 +85,7 @@ public class ListingService : IListingService
         }
 
         if (filter.MaxPrice != null && listing.DaysPrice > filter.MaxPrice) return false;
-        
+
         return true;
     }
 
@@ -87,7 +93,7 @@ public class ListingService : IListingService
     {
         var user = await _context.Users
             .Include(u => u.Listings.Where(listing => listing.Hidden == false))
-            .FirstOrDefaultAsync(u => u.UserName == userName);
+            .FirstOrDefaultAsync(u => u.Username == userName);
 
         if (user == null)
             throw new KeyNotFoundException();
@@ -148,7 +154,7 @@ public class ListingService : IListingService
         return unavailableDates.ToList();
     }
 
-    public async Task<Listing?> UpdateListingInfoAsync(Listing listing)
+    public async Task<Listing?> UpdateListingInfoAsync(Listing listing, bool force)
     {
         var existingListing = await _context.Listings
             .Include(l => l.Owner)
@@ -159,14 +165,31 @@ public class ListingService : IListingService
             return null;
         }
 
+        //For demo purposes only
+        if (listing.Title.EndsWith("[SLOW]"))
+        {
+            await Task.Delay(8000);
+        }
+
         existingListing.City = listing.City;
         existingListing.Deposit = listing.Deposit;
         existingListing.Description = listing.Description;
         existingListing.Title = listing.Title;
         existingListing.DaysPrice = listing.DaysPrice;
 
-        await _context.SaveChangesAsync();
-        return listing;
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            if (!force) throw;
+
+            await ex.Entries.Single().ReloadAsync();
+            await _context.SaveChangesAsync();
+        }
+
+        return existingListing;
     }
 
     public async Task<bool> IsByUser(long listingId, string userName)
@@ -175,18 +198,19 @@ public class ListingService : IListingService
             .AsNoTracking()
             .Include(u => u.Owner)
             .FirstOrDefaultAsync(l => l.ListingId == listingId);
-        return existingListing != null && existingListing.Owner.UserName == userName;
+        return existingListing != null && existingListing.Owner.Username == userName;
     }
 
     public async Task DeleteListingAsync(long listingId)
     {
         var listing = await _context.Listings
             .FirstOrDefaultAsync(l => l.ListingId == listingId);
-        
+
         if (listing == null) return;
         _context.Listings.Remove(listing);
         await _context.SaveChangesAsync();
     }
+
     public async Task<IList<Listing>?> SearchListingsAsync(string searchString)
     {
         if (!IsNullOrEmpty(searchString))
@@ -196,15 +220,16 @@ public class ListingService : IListingService
                 .Where(l => l.Hidden == false && l.Title.ToLower().Contains(searchString.ToLower()))
                 .ToListAsync();
         }
+
         return null;
     }
-    
+
     public async Task SetImageAsync(long listingId, DbImage image)
     {
         var listing = _context.Listings.FirstOrDefault(l => l.ListingId == listingId);
         if (listing == null)
             return;
-        
+
         listing.Image = image;
         await _context.SaveChangesAsync();
     }

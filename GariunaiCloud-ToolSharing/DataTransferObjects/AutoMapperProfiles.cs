@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using GariunaiCloud_ToolSharing.Models;
 
-namespace GariunaiCloud_ToolSharing.PresentationLayer.DataTransferObjects;
+namespace GariunaiCloud_ToolSharing.Controllers.DataTransferObjects;
 
 public class AutoMapperProfiles : Profile
 {
@@ -13,7 +13,7 @@ public class AutoMapperProfiles : Profile
         CreateMap<ListingInfo, Listing>();
         CreateMap<Listing, ListingInfo>()
             .ForMember(dto => dto.OwnerUsername, opt
-                => opt.MapFrom(src => src.Owner.UserName));
+                => opt.MapFrom(src => src.Owner.Username));
         
         CreateMap<NewListingPayload, Listing>()
             .ReverseMap();
@@ -22,6 +22,6 @@ public class AutoMapperProfiles : Profile
             .ForMember(dto => dto.ListingId, opt
                 => opt.MapFrom(src => src.Listing.ListingId))
             .ForMember(dto => dto.PlacerUsername, opt
-                => opt.MapFrom(src => src.User.UserName));
+                => opt.MapFrom(src => src.User.Username));
     }
 }

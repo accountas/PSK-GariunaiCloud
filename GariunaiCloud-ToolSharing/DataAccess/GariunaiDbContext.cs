@@ -13,13 +13,13 @@ public class GariunaiDbContext : DbContext
     public DbSet<Listing> Listings { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<Order> Orders { get; set; }
-
     public DbSet<DbImage> Images { get; set; }
+    public DbSet<AccessLog> AccessLogs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<User>()
-            .HasIndex(u => u.UserName)
+            .HasIndex(u => u.Username)
             .IsUnique();
         
         modelBuilder.Entity<User>()
@@ -37,8 +37,8 @@ public class GariunaiDbContext : DbContext
     private void _seedData(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<User>().HasData(
-            new User { UserId = 1, Email = "mail1.com", UserName = "Useris1", PhoneNumber = "+1233567812" },
-            new User { UserId = 2, Email = "mail2.com", UserName = "Useris2", PhoneNumber = "+1233567812" });
+            new User { UserId = 1, Email = "mail1.com", Username = "Useris1", PhoneNumber = "+1233567812" },
+            new User { UserId = 2, Email = "mail2.com", Username = "Useris2", PhoneNumber = "+1233567812" });
 
         modelBuilder.Entity<Listing>().HasData(
             new

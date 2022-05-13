@@ -8,6 +8,7 @@ public class ListingsFilter
     public string? City { get; set; }
     public decimal? MaxPrice { get; set; }
     public ListingSortOrder SortOrder { get; set; }
+    public string? Username { get; set; }
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter))]

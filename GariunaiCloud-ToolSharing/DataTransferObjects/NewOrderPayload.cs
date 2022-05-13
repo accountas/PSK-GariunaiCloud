@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace GariunaiCloud_ToolSharing.PresentationLayer.DataTransferObjects;
+namespace GariunaiCloud_ToolSharing.Controllers.DataTransferObjects;
 
 public class NewOrderPayload
 {

@@ -6,11 +6,13 @@ public static class Extensions
 {
     public static string GetUsername(this ClaimsPrincipal principal)
     {
-        return principal.Claims.First(c => c.Type == ClaimTypes.Name).Value;
+        var claim = principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name);
+        return claim == null ? "Anonymous" : claim.Value;
     }
-    public static DateTime ToDateTime(this DateOnly dateOnly)
+    
+    public static string GetRole(this ClaimsPrincipal principal)
     {
-        return new DateTime(dateOnly.Year, dateOnly.Month, dateOnly.Day);
+        var claim = principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role);
+        return claim == null ? "Anonymous" : claim.Value;
     }
-
 }

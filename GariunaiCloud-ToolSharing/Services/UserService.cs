@@ -20,7 +20,7 @@ public class UserService : IUserService
     {
         var user = _context
             .Users
-            .FirstOrDefaultAsync(u => u.UserName == username);
+            .FirstOrDefaultAsync(u => u.Username == username);
 
         return user;
     }
@@ -33,26 +33,25 @@ public class UserService : IUserService
 
         return !emailExists;
     }
-    
-    
+
 
     public async Task<User?> RegisterUserAsync(string username, string email, string password)
     {
-        if(GetUserByUsernameAsync((username)).Result != null)
+        if (GetUserByUsernameAsync((username)).Result != null || username == "me")
         {
             return null;
         }
-        
+
         _passwordHashingStrategy.HashPassword(password, out var hashedPassword, out var salt);
-        
+
         var user = new User
         {
-            UserName = username,
+            Username = username,
             Email = email,
             PasswordHash = hashedPassword,
             PasswordSalt = salt
         };
-        
+
         await _context.Users.AddAsync(user);
         await _context.SaveChangesAsync();
         return user;
@@ -62,13 +61,13 @@ public class UserService : IUserService
     {
         var user = await _context
             .Users
-            .FirstOrDefaultAsync(u => u.UserName == username);
-        
-        if(user == null)
+            .FirstOrDefaultAsync(u => u.Username == username);
+
+        if (user == null)
         {
             return null;
         }
-        
+
         return !_passwordHashingStrategy.VerifyPassword(password, user.PasswordHash, user.PasswordSalt) ? null : user;
     }
 
@@ -77,19 +76,19 @@ public class UserService : IUserService
         var user = await _context
             .Users
             .FirstOrDefaultAsync(u => u.Email == email);
-        
-        if(user == null)
+
+        if (user == null)
         {
             return null;
         }
-        
+
         return !_passwordHashingStrategy.VerifyPassword(password, user.PasswordHash, user.PasswordSalt) ? null : user;
     }
 
     public async Task<User?> UpdateUserInfoAsync(string userName, User user)
     {
         var existingUser = await _context.Users
-            .FirstOrDefaultAsync(u => u.UserName == userName);
+            .FirstOrDefaultAsync(u => u.Username == userName);
 
         if (existingUser == null)
         {
@@ -98,18 +97,18 @@ public class UserService : IUserService
 
         existingUser.Email = user.Email;
         existingUser.PhoneNumber = user.PhoneNumber;
-        
+
         await _context.SaveChangesAsync();
         return existingUser;
     }
-    
-    public  Task<List<User>> GetUsersAsync()
+
+    public Task<List<User>> GetUsersAsync()
     {
         return _context.Users.ToListAsync();
     }
 
     public Task<bool> UserExistsAsync(string username)
     {
-        return _context.Users.AnyAsync(u => u.UserName == username);
+        return _context.Users.AnyAsync(u => u.Username == username);
     }
 }

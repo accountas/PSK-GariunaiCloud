@@ -1,4 +1,4 @@
-﻿namespace GariunaiCloud_ToolSharing.PresentationLayer.DataTransferObjects;
+﻿namespace GariunaiCloud_ToolSharing.Controllers.DataTransferObjects;
 
 #nullable disable
 public class UserInfo

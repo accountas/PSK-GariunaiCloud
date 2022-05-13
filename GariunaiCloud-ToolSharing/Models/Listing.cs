@@ -1,4 +1,5 @@
-﻿using System.Net.Mime;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Net.Mime;
 
 namespace GariunaiCloud_ToolSharing.Models;
 
@@ -15,4 +16,5 @@ public class Listing
     public User Owner { get; set; }
     public List<Order> Orders { get; set; }
     public DbImage Image { get; set; }
+    [Timestamp] public byte[] Version { get; set; }
 }

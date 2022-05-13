@@ -23,7 +23,7 @@ public class OrderService : IOrderService
             .AsNoTracking()
             .Include(o => o.User)
             .Include(o => o.Listing)
-            .Where(o => o.User.UserName == userName)
+            .Where(o => o.User.Username == userName)
             .ToListAsync();
     }
 
@@ -35,23 +35,22 @@ public class OrderService : IOrderService
             .Include(o => o.Listing)
             .Include(o => o.Listing.Owner)
             .Include(o => o.User)
-            .Where(o => o.Listing.Owner.UserName == userName)
+            .Where(o => o.Listing.Owner.Username == userName)
             .ToListAsync();
     }
 
     public async Task<Order?> PlaceOrderAsync(string userName, long listingId, DateTime startDate, DateTime endDate)
     {
-        
-        if(startDate > endDate)
+        if (startDate > endDate)
         {
             return null;
         }
-        
+
         if (!_listingService.ListingExistsAsync(listingId).Result)
         {
             return null;
         }
-        
+
         if (!_listingService.IsAvailableToRentAsync(listingId, startDate, endDate).Result)
         {
             return null;
@@ -60,7 +59,7 @@ public class OrderService : IOrderService
         var listing = await _context.Listings
             .FirstOrDefaultAsync(l => l.ListingId == listingId);
         var user = await _context.Users
-            .FirstOrDefaultAsync(u => u.UserName == userName);
+            .FirstOrDefaultAsync(u => u.Username == userName);
         var now = DateTime.Now;
         var duration = (endDate - startDate).Days + 1;
         var price = listing!.DaysPrice * duration;
@@ -81,7 +80,6 @@ public class OrderService : IOrderService
         await _context.SaveChangesAsync();
         _context.Entry(order).State = EntityState.Detached;
         return order;
-
     }
 
     public Task<Order?> GetOrderAsync(long orderId)
@@ -102,12 +100,12 @@ public class OrderService : IOrderService
             .Include(o => o.Listing.Owner)
             .Include(o => o.User)
             .FirstOrDefaultAsync(o => o.OrderId == orderId);
-        
+
         if (order == null)
         {
             return null;
         }
-        
+
         if (order.Status == status)
         {
             throw new InvalidOperationException("Order status is already set to " + status);
@@ -117,12 +115,13 @@ public class OrderService : IOrderService
         {
             case OrderStatus.Pending:
                 throw new InvalidOperationException("Order cannot be set to pending status");
-                //break;
+            //break;
             case OrderStatus.Confirmed:
-                if(order.Status != OrderStatus.Pending)
+                if (order.Status != OrderStatus.Pending)
                 {
                     throw new InvalidOperationException("Can't confirm order that is not pending");
                 }
+
                 order.Status = status;
                 order.ConfirmationDateTime = DateTime.Now;
                 break;
@@ -131,6 +130,7 @@ public class OrderService : IOrderService
                 {
                     throw new InvalidOperationException("Can't cancel order that is already completed");
                 }
+
                 order.Status = status;
                 order.CompletionDateTime = DateTime.Now;
                 break;
@@ -139,7 +139,8 @@ public class OrderService : IOrderService
                 {
                     throw new InvalidOperationException("Can't complete order that is not confirmed or in progress");
                 }
-                order.Status = status;  
+
+                order.Status = status;
                 order.CompletionDateTime = DateTime.Now;
                 break;
             case OrderStatus.InProgress:
@@ -147,11 +148,13 @@ public class OrderService : IOrderService
                 {
                     throw new InvalidOperationException("Can't set order to in progress that is not confirmed");
                 }
+
                 order.Status = status;
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(status), status, null);
         }
+
         await _context.SaveChangesAsync();
         _context.Entry(order).State = EntityState.Detached;
         return order;
@@ -172,7 +175,6 @@ public class OrderService : IOrderService
 
         _context.Remove(order);
         return Task.FromResult(_context.SaveChangesAsync().Result > 0);
-
     }
 
     public async Task<bool> IsAuthorizedAsync(long orderId, string userName)
@@ -188,9 +190,9 @@ public class OrderService : IOrderService
         {
             return false;
         }
-        
-        var isPoster = order.User.UserName == userName;
-        
+
+        var isPoster = order.User.Username == userName;
+
         return isPoster;
     }
 
@@ -202,8 +204,8 @@ public class OrderService : IOrderService
         {
             return false;
         }
-        
-        var isOwner = order.Listing.Owner.UserName == userName;
+
+        var isOwner = order.Listing.Owner.Username == userName;
         return isOwner;
     }
 }

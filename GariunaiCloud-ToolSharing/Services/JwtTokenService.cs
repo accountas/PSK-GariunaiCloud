@@ -20,10 +20,10 @@ public class JwtTokenService : IJwtTokenService
     {
         var claims = new List<Claim>()
         {
-            new(ClaimTypes.Name, user.UserName),
+            new(ClaimTypes.Name, user.Username),
             new(ClaimTypes.Role, user.Role.ToString())
         };
-        
+
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
 
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);

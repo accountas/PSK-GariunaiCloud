@@ -1,10 +1,13 @@
 ﻿using System.Diagnostics;
-using System.Drawing;
 using System.Security.Cryptography;
 using GariunaiCloud_ToolSharing.DataAccess;
 using GariunaiCloud_ToolSharing.IServices;
 using GariunaiCloud_ToolSharing.Models;
 using Microsoft.EntityFrameworkCore;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 
 namespace GariunaiCloud_ToolSharing.Services;
 
@@ -24,24 +27,22 @@ public class ImageService : IImageService
 
     public async Task<DbImage> UploadImageAsync(byte[] imageData)
     {
-        var md5 = MD5.Create();
-        var hash = md5.ComputeHash(imageData);
-        var hashString = BitConverter
-            .ToString(hash)
-            .Replace("-", "")
-            .ToLower()[..10];
-        
-        var image = new DbImage
+        var image = Image.Load<Rgba32>(imageData);
+        image.Mutate(i => i.Resize(0, Math.Min(480, image.Height)));
+        using var ms = new MemoryStream();
+        await image.SaveAsync(ms, new JpegEncoder());
+
+        var dbImage = new DbImage
         {
-            Name = hashString,
-            ImageData = imageData
+            Name = Guid.NewGuid().ToString(),
+            ImageData = ms.ToArray()
         };
-        
+
         Console.WriteLine("Image uploaded");
-        await _context.Images.AddAsync(image);
+        await _context.Images.AddAsync(dbImage);
         await _context.SaveChangesAsync();
         Console.WriteLine("Image uploaded");
-        return image;
+        return dbImage;
     }
 
     public Task DeleteImageAsync(string imageName)

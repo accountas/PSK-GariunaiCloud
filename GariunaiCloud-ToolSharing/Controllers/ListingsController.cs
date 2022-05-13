@@ -1,12 +1,13 @@
 using System.Security.Claims;
 using AutoMapper;
+using GariunaiCloud_ToolSharing.Controllers.DataTransferObjects;
 using GariunaiCloud_ToolSharing.IServices;
 using GariunaiCloud_ToolSharing.Models;
-using GariunaiCloud_ToolSharing.PresentationLayer.DataTransferObjects;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
-namespace GariunaiCloud_ToolSharing.PresentationLayer
+namespace GariunaiCloud_ToolSharing.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -114,22 +115,33 @@ namespace GariunaiCloud_ToolSharing.PresentationLayer
         /// </summary>
         /// <param name="listingInfo">Listing information</param>
         /// <param name="id">Listing id</param>
+        /// <param name="force">Force update in case of conflict</param>
         /// <remarks>Requires authentication</remarks>
         /// <returns>Updated listing object without Owner object</returns>
         [HttpPut("{id:long}")]
         [Authorize]
-        public async Task<IActionResult> UpdateListing(NewListingPayload listingInfo, long id)
+        public async Task<IActionResult> UpdateListing(NewListingPayload listingInfo, long id, [FromQuery] bool force = false)
         {
             var userName = User.Claims.First(c => c.Type == ClaimTypes.Name).Value;
             var listing = _mapper.Map<Listing>(listingInfo);
+            listing.ListingId = id;
             if(!_listingService.ListingExistsAsync(id).Result)
             {
                 return NotFound();
             }
             if (!await _listingService.IsByUser(id, userName))
                 return Unauthorized();
+
+            Listing? newListing;
+            try
+            {
+                newListing = await _listingService.UpdateListingInfoAsync(listing, force);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return Conflict();
+            }
             
-            var newListing = await _listingService.UpdateListingInfoAsync(listing);
             var dto = _mapper.Map<ListingInfo>(newListing);
             return Ok(dto);
         }
