@@ -166,7 +166,7 @@ namespace GariunaiCloud_ToolSharing.Controllers
             return Ok();
         }
 
-        [HttpGet("/{id:long}/image")]
+        [HttpGet("{id:long}/image")]
         public async Task<IActionResult> GetListingImage(long id)
         {
             var listing = await _listingService.GetListingAsync(id);
@@ -180,7 +180,7 @@ namespace GariunaiCloud_ToolSharing.Controllers
             }
             return File(listing.Image.ImageData, "image/jpeg");
         }
-        [HttpPut("/{id:long}/image")]
+        [HttpPut("{id:long}/image")]
         [Authorize]
         public async Task<IActionResult> GetListingImage(long id, IFormFile file)
         {
