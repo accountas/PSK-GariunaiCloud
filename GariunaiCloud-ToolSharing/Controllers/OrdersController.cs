@@ -108,15 +108,16 @@ public class OrdersController : Controller
         var dto = _mapper.Map<OrderPayload>(order);
         return Ok(dto);
     }
-    
+
     /// <summary>
     /// Change order status
     /// </summary>
     /// <param name="id">order id</param>
     /// <param name="status">new order status</param>
+    /// <param name="force">Ignore status order validation for testing only</param>
     [HttpPost("{id:long}/status")]
     [Authorize]
-    public async Task<IActionResult> UpdateOrderStatus(long id, OrderStatus status)
+    public async Task<IActionResult> UpdateOrderStatus(long id, OrderStatus status, [FromQuery] bool force)
     {
         var userName = User.GetUsername();
         if(!_orderService.OrderExistsAsync(id).Result)
@@ -134,7 +135,7 @@ public class OrdersController : Controller
         
         try
         {
-            var order = await _orderService.UpdateOrderStatusAsync(id, status);
+            var order = await _orderService.UpdateOrderStatusAsync(id, status, force);
             var dto = _mapper.Map<OrderPayload>(order);
             return Ok(dto);
         }

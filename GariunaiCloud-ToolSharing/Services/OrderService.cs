@@ -93,7 +93,7 @@ public class OrderService : IOrderService
             .FirstOrDefaultAsync(o => o.OrderId == orderId);
     }
 
-    public async Task<Order?> UpdateOrderStatusAsync(long orderId, OrderStatus status)
+    public async Task<Order?> UpdateOrderStatusAsync(long orderId, OrderStatus status, bool force)
     {
         var order = await _context.Orders
             .Include(o => o.Listing)
@@ -117,7 +117,7 @@ public class OrderService : IOrderService
                 throw new InvalidOperationException("Order cannot be set to pending status");
             //break;
             case OrderStatus.Confirmed:
-                if (order.Status != OrderStatus.Pending)
+                if (!force && order.Status != OrderStatus.Pending)
                 {
                     throw new InvalidOperationException("Can't confirm order that is not pending");
                 }
@@ -126,7 +126,7 @@ public class OrderService : IOrderService
                 order.ConfirmationDateTime = DateTime.Now;
                 break;
             case OrderStatus.Cancelled:
-                if (order.Status == OrderStatus.Completed)
+                if (!force && order.Status == OrderStatus.Completed)
                 {
                     throw new InvalidOperationException("Can't cancel order that is already completed");
                 }
@@ -135,7 +135,7 @@ public class OrderService : IOrderService
                 order.CompletionDateTime = DateTime.Now;
                 break;
             case OrderStatus.Completed:
-                if (order.Status != OrderStatus.InProgress && order.Status != OrderStatus.Confirmed)
+                if (!force && order.Status != OrderStatus.InProgress && order.Status != OrderStatus.Confirmed)
                 {
                     throw new InvalidOperationException("Can't complete order that is not confirmed or in progress");
                 }
@@ -144,7 +144,7 @@ public class OrderService : IOrderService
                 order.CompletionDateTime = DateTime.Now;
                 break;
             case OrderStatus.InProgress:
-                if (order.Status != OrderStatus.Confirmed)
+                if (!force && order.Status != OrderStatus.Confirmed)
                 {
                     throw new InvalidOperationException("Can't set order to in progress that is not confirmed");
                 }

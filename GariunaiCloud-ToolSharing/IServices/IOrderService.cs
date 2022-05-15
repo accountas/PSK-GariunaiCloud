@@ -8,7 +8,7 @@ public interface IOrderService
     public Task<List<Order>> GetReceivedOrdersByUserAsync(string userName);
     public Task<Order?> PlaceOrderAsync(string userName, long listingId, DateTime startDate, DateTime endDate);
     public Task<Order?> GetOrderAsync(long orderId);
-    public Task<Order?> UpdateOrderStatusAsync(long orderId, OrderStatus status);
+    public Task<Order?> UpdateOrderStatusAsync(long orderId, OrderStatus status, bool force);
     public Task<bool> OrderExistsAsync(long orderId);
     public Task<bool> DeleteOrderAsync(long orderId);
     public Task<bool> IsAuthorizedAsync(long orderId, string userName);

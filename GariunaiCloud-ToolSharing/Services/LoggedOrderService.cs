@@ -45,10 +45,10 @@ public class LoggedOrderService : IOrderService
         return await _orderService.GetOrderAsync(orderId);
     }
 
-    public async Task<Order?> UpdateOrderStatusAsync(long orderId, OrderStatus status)
+    public async Task<Order?> UpdateOrderStatusAsync(long orderId, OrderStatus status, bool force)
     {
         await _accessLogger.LogAsync(_getMethodAccessLog(nameof(UpdateOrderStatusAsync)));
-        return await _orderService.UpdateOrderStatusAsync(orderId, status);
+        return await _orderService.UpdateOrderStatusAsync(orderId, status, force);
     }
 
     public async Task<bool> OrderExistsAsync(long orderId)

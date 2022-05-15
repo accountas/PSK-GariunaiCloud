@@ -57,7 +57,6 @@ namespace GariunaiCloud_ToolSharing.Controllers
         /// <summary>
         /// Get user by username
         /// </summary>
-        /// <param name="username"></param>
         /// <returns></returns>
         [HttpGet("me")]
         [Authorize]
