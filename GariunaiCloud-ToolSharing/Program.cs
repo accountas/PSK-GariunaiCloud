@@ -2,7 +2,7 @@ using System.Reflection;
 using System.Text;
 using GariunaiCloud_ToolSharing.DataAccess;
 using GariunaiCloud_ToolSharing.IServices;
-using GariunaiCloud_ToolSharing.Controllers.DataTransferObjects;
+using GariunaiCloud_ToolSharing.DataTransferObjects;
 using GariunaiCloud_ToolSharing.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;

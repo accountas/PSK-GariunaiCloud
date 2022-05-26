@@ -117,25 +117,35 @@ namespace GariunaiCloud_ToolSharing.Controllers
         /// <param name="id">Listing id</param>
         /// <param name="force">Force update in case of conflict</param>
         /// <remarks>Requires authentication</remarks>
-        /// <returns>Updated listing object without Owner object</returns>
+        /// <returns>Updated listing object</returns>
         [HttpPut("{id:long}")]
         [Authorize]
-        public async Task<IActionResult> UpdateListing(NewListingPayload listingInfo, long id, [FromQuery] bool force = false)
+        public async Task<IActionResult> UpdateListing(NewListingPayload listingInfo, long id)
         {
-            var userName = User.Claims.First(c => c.Type == ClaimTypes.Name).Value;
+            var userName = User.GetUsername();
+            
             var listing = _mapper.Map<Listing>(listingInfo);
             listing.ListingId = id;
+
+            if (listingInfo.ETag == null)
+            {
+                return BadRequest("Missing etag");
+            }
             if(!_listingService.ListingExistsAsync(id).Result)
             {
                 return NotFound();
             }
+
             if (!await _listingService.IsByUser(id, userName))
+            {
                 return Unauthorized();
+            }
+                
 
             Listing? newListing;
             try
             {
-                newListing = await _listingService.UpdateListingInfoAsync(listing, force);
+                newListing = await _listingService.UpdateListingInfoAsync(listing);
             }
             catch (DbUpdateConcurrencyException)
             {

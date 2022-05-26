@@ -14,4 +14,6 @@ public class NewListingPayload
     [Required] public decimal Deposit { get; set; }
 
     [Required] public decimal DaysPrice { get; set; }
+    
+    public string ETag { get; set; }
 }

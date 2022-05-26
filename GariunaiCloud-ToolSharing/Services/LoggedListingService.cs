@@ -63,10 +63,10 @@ public class LoggedListingService : IListingService
         return await _listingService.GetUnavailableDatesAsync(listingId, startDate, endDate);
     }
 
-    public async Task<Listing?> UpdateListingInfoAsync(Listing listing, bool force)
+    public async Task<Listing?> UpdateListingInfoAsync(Listing listing)
     {
         await _accessLogger.LogAsync(_getMethodAccessLog(nameof(UpdateListingInfoAsync)));
-        return await _listingService.UpdateListingInfoAsync(listing, force);
+        return await _listingService.UpdateListingInfoAsync(listing);
     }
 
     public async Task DeleteListingAsync(long listingId)

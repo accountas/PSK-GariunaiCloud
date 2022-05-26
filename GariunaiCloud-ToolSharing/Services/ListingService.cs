@@ -154,7 +154,7 @@ public class ListingService : IListingService
         return unavailableDates.ToList();
     }
 
-    public async Task<Listing?> UpdateListingInfoAsync(Listing listing, bool force)
+    public async Task<Listing?> UpdateListingInfoAsync(Listing listing)
     {
         var existingListing = await _context.Listings
             .Include(l => l.Owner)
@@ -164,31 +164,19 @@ public class ListingService : IListingService
         {
             return null;
         }
-
-        //For demo purposes only
-        if (listing.Title.EndsWith("[SLOW]"))
-        {
-            await Task.Delay(8000);
-        }
-
+        
+        var dbVersion = existingListing.Version.ToArray();
+        
         existingListing.City = listing.City;
         existingListing.Deposit = listing.Deposit;
         existingListing.Description = listing.Description;
         existingListing.Title = listing.Title;
         existingListing.DaysPrice = listing.DaysPrice;
 
-        try
-        {
-            await _context.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException ex)
-        {
-            if (!force) throw;
+        _context.Entry(existingListing).Property("Version").OriginalValue = listing.Version.ToArray();
 
-            await ex.Entries.Single().ReloadAsync();
-            await _context.SaveChangesAsync();
-        }
-
+        //throws on concurrency conflict
+        await _context.SaveChangesAsync();
         return existingListing;
     }
 
