@@ -1,7 +1,7 @@
 using System.Security.Claims;
 using System.Text.RegularExpressions;
 using AutoMapper;
-using GariunaiCloud_ToolSharing.Controllers.DataTransferObjects;
+using GariunaiCloud_ToolSharing.DataTransferObjects;
 using GariunaiCloud_ToolSharing.IServices;
 using GariunaiCloud_ToolSharing.Models;
 using GariunaiCloud_ToolSharing.Services;

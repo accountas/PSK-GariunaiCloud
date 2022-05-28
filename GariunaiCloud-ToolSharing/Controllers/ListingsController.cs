@@ -1,6 +1,6 @@
 using System.Security.Claims;
 using AutoMapper;
-using GariunaiCloud_ToolSharing.Controllers.DataTransferObjects;
+using GariunaiCloud_ToolSharing.DataTransferObjects;
 using GariunaiCloud_ToolSharing.IServices;
 using GariunaiCloud_ToolSharing.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -50,6 +50,45 @@ namespace GariunaiCloud_ToolSharing.Controllers
 
             var payload = _mapper.Map<ListingInfo>(listing);
             return Ok(payload);
+        }
+        
+        /// <summary>
+        /// Get logged in users listings (including hidden ones)
+        /// </summary>
+        [HttpGet("mine")]
+        [Authorize]
+        public async Task<IActionResult> GetMineListings()
+        {
+            var listings = await _listingService.GetAllListingsByUserAsync(User.GetUsername());
+            var payload = _mapper.Map<List<ListingInfo>>(listings);
+            return Ok(payload);
+        }
+        
+        
+        /// <summary>
+        /// Switch listings hidden status
+        /// </summary>
+        /// <param name="id">Listing id</param>
+        /// <returns>Updated listing</returns>
+        [HttpPatch("{id:long}/hidden")]
+        [Authorize]
+        public async Task<IActionResult> PatchHide(long id)
+        {
+            var userName = User.GetUsername();
+            if(!_listingService.ListingExistsAsync(id).Result)
+            {
+                return NotFound();
+            }
+
+            if (!await _listingService.IsByUser(id, userName))
+            {
+                return Unauthorized();
+            }
+
+            var listing = await _listingService.GetListingAsync(id);
+            listing!.Hidden = !listing.Hidden;
+            await _listingService.UpdateListingInfoAsync(listing);
+            return Ok(_mapper.Map<ListingInfo>(listing));
         }
 
         /// <summary>

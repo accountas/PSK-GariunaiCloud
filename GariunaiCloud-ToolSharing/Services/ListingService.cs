@@ -23,7 +23,7 @@ public class ListingService : IListingService
             .Listings
             .Include(l => l.Owner)
             .Include(l => l.Image)
-            .FirstOrDefaultAsync(l => l.ListingId == listingId && l.Hidden == false);
+            .FirstOrDefaultAsync(l => l.ListingId == listingId);
         return listing;
     }
 
@@ -89,10 +89,10 @@ public class ListingService : IListingService
         return true;
     }
 
-    public async Task<IList<Listing>> GetListingsByUserAsync(string userName)
+    public async Task<IList<Listing>> GetAllListingsByUserAsync(string userName)
     {
         var user = await _context.Users
-            .Include(u => u.Listings.Where(listing => listing.Hidden == false))
+            .Include(u => u.Listings)
             .FirstOrDefaultAsync(u => u.Username == userName);
 
         if (user == null)
@@ -172,6 +172,7 @@ public class ListingService : IListingService
         existingListing.Description = listing.Description;
         existingListing.Title = listing.Title;
         existingListing.DaysPrice = listing.DaysPrice;
+        existingListing.Hidden = listing.Hidden;
 
         _context.Entry(existingListing).Property("Version").OriginalValue = listing.Version.ToArray();
 

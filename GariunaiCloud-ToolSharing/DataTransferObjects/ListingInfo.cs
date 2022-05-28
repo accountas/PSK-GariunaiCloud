@@ -1,4 +1,4 @@
-﻿namespace GariunaiCloud_ToolSharing.Controllers.DataTransferObjects;
+﻿namespace GariunaiCloud_ToolSharing.DataTransferObjects;
 
 #nullable disable
 public class ListingInfo
@@ -10,5 +10,6 @@ public class ListingInfo
     public string Description { get; set; }
     public decimal Deposit { get; set; }
     public decimal DaysPrice { get; set; }
+    public bool Hidden { get; set; }
     public string ETag { get; set; }
 }

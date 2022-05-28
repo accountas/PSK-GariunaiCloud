@@ -1,7 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
-using GariunaiCloud_ToolSharing.Models;
+﻿using GariunaiCloud_ToolSharing.Models;
 
-namespace GariunaiCloud_ToolSharing.Controllers.DataTransferObjects;
+namespace GariunaiCloud_ToolSharing.DataTransferObjects;
 
 #nullable disable
 public class OrderPayload

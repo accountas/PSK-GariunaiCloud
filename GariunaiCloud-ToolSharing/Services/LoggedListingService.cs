@@ -39,10 +39,10 @@ public class LoggedListingService : IListingService
         return await _listingService.GetListingsAsync(filters);
     }
 
-    public async Task<IList<Listing>> GetListingsByUserAsync(string userName)
+    public async Task<IList<Listing>> GetAllListingsByUserAsync(string userName)
     {
-        await _accessLogger.LogAsync(_getMethodAccessLog(nameof(GetListingsByUserAsync)));
-        return await _listingService.GetListingsByUserAsync(userName);
+        await _accessLogger.LogAsync(_getMethodAccessLog(nameof(GetAllListingsByUserAsync)));
+        return await _listingService.GetAllListingsByUserAsync(userName);
     }
 
     public async Task<bool> ListingExistsAsync(long listingId)
